@@ -42,6 +42,28 @@ Prioridad: **P0** imprescindible · **P1** importante · **P2** deseable.
 - Registro de métricas de IA (coste/latencia/tokens) sin datos personales.
 - **Batería de evaluación** automatizada.
 
+#### Próximo paso del asistente — Caché de respuestas (reducir costo por usuario)
+Objetivo: bajar el **coste de IA por usuario** (métrica que define la viabilidad
+del negocio) y mejorar velocidad y consistencia, sin sacrificar calidad ni
+cuidado pastoral. Se combinan varias capas:
+- **Biblioteca curada** (200–500 preguntas frecuentes con respuestas revisadas
+  por una persona/pastor): calidad y ortodoxia garantizadas, costo ~cero en lo
+  más consultado.
+- **Caché semántica** (aprovecha pgvector + `embed()` ya existentes): guardar
+  `pregunta + embedding + respuesta` en una tabla `answer_cache`; ante una nueva
+  consulta, buscar la más similar y reutilizar la respuesta solo si supera un
+  **umbral de similitud conservador**.
+- **Prompt caching** del proveedor para el prompt de sistema (fijo y largo).
+
+Cuidados no negociables:
+- **Nunca** cachear consultas personales o sensibles (crisis, oración específica,
+  datos de la persona): siempre respuesta fresca con guardarraíles.
+- **Invalidación**: poder purgar lo cacheado si cambia la declaración doctrinal o
+  se corrige una respuesta.
+- **Umbral conservador**: ante la duda, consultar al modelo (en temas de fe, un
+  falso positivo de "misma pregunta" es un riesgo doctrinal).
+- No cachear lo contextual/personalizado (referencias a la lectura en curso).
+
 ### Épica 3 — Biblia (P0)
 - Carga de traducción(es) licenciada(s); lector libro/capítulo/versículo.
 - Versículo del día; enlace desde citas del asistente; favorito/nota.
