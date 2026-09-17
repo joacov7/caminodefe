@@ -1,12 +1,9 @@
 /**
  * Límites de uso del asistente por plan. La lógica de decisión es pura y
- * testeable; el conteo real contra la DB se resuelve aparte.
+ * testeable; el conteo real contra la DB se resuelve aparte. El límite por plan
+ * proviene del catálogo único (server/billing/plans).
  */
-
-export const PLAN_DAILY_LIMITS: Record<string, number> = {
-  free: 15,
-  premium: 200,
-};
+import { planDailyLimit } from "@/server/billing/plans";
 
 export type LimitDecision = {
   allowed: boolean;
@@ -19,7 +16,7 @@ export function checkDailyLimit(
   planId: string,
   usedToday: number,
 ): LimitDecision {
-  const limit = PLAN_DAILY_LIMITS[planId] ?? PLAN_DAILY_LIMITS.free!;
+  const limit = planDailyLimit(planId);
   const remaining = Math.max(0, limit - usedToday);
   return { allowed: usedToday < limit, limit, used: usedToday, remaining };
 }

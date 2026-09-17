@@ -77,6 +77,21 @@ export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "trialing",
 ]);
 
+// Destino del aporte (fondos SEPARADOS; nunca se mezclan automáticamente).
+export const contributionTypeEnum = pgEnum("contribution_type", [
+  "platform", // sostener la plataforma
+  "church", // diezmo/ofrenda a una iglesia
+  "mission", // colaboración para una misión/proyecto
+]);
+
+export const contributionStatusEnum = pgEnum("contribution_status", [
+  "pending", // registrado; cobro no procesado (etapa actual)
+  "confirmed",
+  "failed",
+  "refunded",
+  "canceled",
+]);
+
 // ---------------------------------------------------------------------------
 // Auth.js (NextAuth v5) — users / accounts / sessions / verification tokens
 // ---------------------------------------------------------------------------
@@ -485,6 +500,37 @@ export const subscriptions = pgTable(
     canceledAt: timestamp("canceled_at"),
   },
   (t) => [uniqueIndex("subscriptions_user_idx").on(t.userId)],
+);
+
+// Aportes voluntarios (donaciones/ofrendas/colaboraciones). En la etapa actual
+// se REGISTRAN pero el cobro no se procesa (sin proveedor de pagos activo).
+// Los fondos se separan por `type` y `recipientChurchId`; nunca se mezclan.
+export const contributions = pgTable(
+  "contributions",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: contributionTypeEnum("type").notNull(),
+    recipientChurchId: text("recipient_church_id").references(() => churches.id, {
+      onDelete: "set null",
+    }),
+    // Monto en la unidad mínima de la moneda (p. ej. centavos). 0 = a definir.
+    amountMinor: integer("amount_minor").default(0).notNull(),
+    currency: text("currency").default("ARS").notNull(),
+    note: text("note"),
+    status: contributionStatusEnum("status").default("pending").notNull(),
+    provider: text("provider").default("manual").notNull(), // manual | mercadopago | ...
+    providerRef: text("provider_ref"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [
+    index("contributions_user_idx").on(t.userId),
+    index("contributions_recipient_idx").on(t.recipientChurchId),
+  ],
 );
 
 // ---------------------------------------------------------------------------

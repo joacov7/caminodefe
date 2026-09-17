@@ -46,7 +46,16 @@ export default async function PerfilPage() {
       )}
 
       <section className="grid grid-cols-1 gap-4">
-        <Row title="Suscripción" desc="Plan Gratuito · Premium disponible (sin cobro en esta etapa)." />
+        <Row
+          href="/plan"
+          title="Tu plan"
+          desc="Plan Gratuito · Premium disponible (sin cobro en esta etapa)."
+        />
+        <Row
+          href="/apoyar"
+          title="Apoyá el proyecto"
+          desc="Donación voluntaria para sostener Camino de Fe."
+        />
         <Row title="Privacidad y consentimientos" desc="Controlá qué datos compartís y con quién." />
         <Row title="Notificaciones" desc="Recordatorios configurables, sin saturar." />
         <Row title="Eliminar historial y datos" desc="Podés borrar tus conversaciones y tu cuenta." />
@@ -55,11 +64,19 @@ export default async function PerfilPage() {
   );
 }
 
-function Row({ title, desc }: { title: string; desc: string }) {
-  return (
-    <article className="rounded-2xl border border-border p-5">
+function Row({ title, desc, href }: { title: string; desc: string; href?: string }) {
+  const inner = (
+    <>
       <h2 className="font-semibold text-primary">{title}</h2>
       <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
-    </article>
+    </>
   );
+  if (href) {
+    return (
+      <Link href={href} className="rounded-2xl border border-border p-5 transition hover:bg-muted/50">
+        {inner}
+      </Link>
+    );
+  }
+  return <article className="rounded-2xl border border-border p-5">{inner}</article>;
 }
