@@ -24,7 +24,7 @@ export default function HomePage() {
         </p>
         <div className="mt-2 flex flex-wrap justify-center gap-3">
           <Link
-            href="/ingresar"
+            href="/inicio"
             className="rounded-full bg-primary px-6 py-3 font-medium text-primary-foreground transition hover:opacity-90"
           >
             Comenzar

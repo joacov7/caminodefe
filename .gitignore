@@ -33,5 +33,5 @@ Thumbs.db
 .vscode/
 *.swp
 
-# Supabase local
-.supabase/
+# Datos bíblicos grandes (se importan aparte; ver content/bible/README.md)
+content/bible/*.json
