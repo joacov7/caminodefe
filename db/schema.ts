@@ -398,6 +398,62 @@ export const contactRequests = pgTable(
 );
 
 // ---------------------------------------------------------------------------
+// Mi Camino — espacio personal PRIVADO (dueño único; ver RLS).
+// Nadie (ni pastor ni admin) accede a estos datos por defecto.
+// ---------------------------------------------------------------------------
+export const userNotes = pgTable(
+  "user_notes",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    title: text("title"),
+    body: text("body").notNull(),
+    linkedRef: text("linked_ref"), // p. ej. "Juan 3:16" o "juan/3"
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => [index("user_notes_user_idx").on(t.userId)],
+);
+
+export const userJournal = pgTable(
+  "user_journal",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    entry: text("entry").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [index("user_journal_user_idx").on(t.userId)],
+);
+
+export const userFavorites = pgTable(
+  "user_favorites",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    refType: text("ref_type").notNull(), // p. ej. "bible_chapter"
+    refId: text("ref_id").notNull(), // p. ej. "juan/3"
+    label: text("label"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("user_favorites_unique_idx").on(t.userId, t.refType, t.refId),
+  ],
+);
+
+// ---------------------------------------------------------------------------
 // Planes y suscripciones (sin cobro real en el MVP)
 // ---------------------------------------------------------------------------
 export const plans = pgTable("plans", {

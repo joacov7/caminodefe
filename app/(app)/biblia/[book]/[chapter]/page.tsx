@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBookBySlug, isValidChapter } from "@/lib/bible/books";
 import { getChapterVerses } from "@/lib/bible/queries";
+import { FavoriteButton } from "./favorite-button";
 
 type Params = { book: string; chapter: string };
 
@@ -47,7 +48,13 @@ export default async function ChapterPage({
           {book.name}{" "}
           <span className="text-muted-foreground">{chapter}</span>
         </h1>
-        <span className="text-xs text-muted-foreground">RVR1909</span>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-xs text-muted-foreground">RVR1909</span>
+          <FavoriteButton
+            refId={`${book.slug}/${chapter}`}
+            label={`${book.name} ${chapter}`}
+          />
+        </div>
       </header>
 
       {result.ok ? (
