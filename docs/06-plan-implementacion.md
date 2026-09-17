@@ -31,10 +31,39 @@ de construir:
 - La IA, si aparece, solo del lado del adulto/creador para generar material que
   luego se revisa; nunca en vivo con el niño.
 
-**Diferenciales candidatos (ver notas de producto).** Ser el "hogar digital de la
-iglesia local" (no otro lector bíblico), el puente humano (IA orienta → pastor
-acompaña), y una experiencia distintiva (camino guiado adaptativo, audio-first,
-momentos compartidos). Se validan con una iglesia piloto, no se declaran.
+### Diferenciales — épicas de experiencia (fases futuras)
+
+La estrategia de diferenciación no es una función suelta sino un cambio de sujeto:
+la mayoría de las apps conectan a la **persona** con la Biblia; Camino de Fe
+conecta a la **iglesia local** con su gente. Foso estructural que un producto
+global de escala no construye. Se **valida con una iglesia piloto, no se declara.**
+
+Pilares (ya en curso, profundizar): **(1)** ser el "sistema nervioso digital" de la
+iglesia local (panel pastoral, contenidos del pastor, eventos, solicitudes);
+**(2)** el **puente humano** — la IA orienta y *deriva* al pastor cuando hace falta
+(el handoff es el momento de valor).
+
+Épicas de experiencia distintiva (para que "no sea una página más"):
+
+- **Épica F1 — Camino guiado adaptativo.** El recorrido central del producto (y su
+  nombre). No un plan estático: se adapta a dónde está la persona (ritmo, temas,
+  respuestas) y el pastor puede **asignar caminos** a su comunidad. Requiere:
+  modelo de "camino" (pasos, estado por usuario), motor de recomendación simple
+  (reglas antes que ML), asignación desde el panel pastoral, y métricas de avance
+  voluntario (nunca "nivel espiritual"). P: alta.
+- **Épica F2 — Audio-first.** Devocionales y respuestas en audio (TTS) y consulta
+  por voz (STT). Sirve a personas mayores, con baja alfabetización o en
+  movimiento; refuerza el hábito diario. Requiere: capa TTS/STT desacoplada (como
+  el `LLMProvider`), controles de reproducción accesibles, y cuidado de costos.
+  P: media.
+- **Épica F3 — Momentos compartidos.** Sincronía comunitaria: la congregación ora
+  lo mismo a una hora, o el pastor envía una reflexión "en vivo". Algo que una
+  página estática no puede hacer. Requiere: programación por iglesia,
+  notificaciones respetuosas (sin saturar), y moderación. Depende de comunidad +
+  notificaciones. P: media, posterior a F1/F2.
+
+> Nota de foco: no construir las tres a la vez. F1 (camino guiado) es la apuesta
+> principal de experiencia; F2 la refuerza; F3 llega con la capa de comunidad.
 
 ## G.2. Backlog priorizado del MVP (épicas → historias)
 
