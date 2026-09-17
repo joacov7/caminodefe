@@ -9,11 +9,11 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { requireEnv } from "../lib/env";
-import { bibleVersions, bibleVerses, plans } from "./schema";
+import { bibleVersions, bibleVerses, plans, contentItems } from "./schema";
 
 async function main() {
   const db = drizzle(neon(requireEnv("DATABASE_URL")), {
-    schema: { bibleVersions, bibleVerses, plans },
+    schema: { bibleVersions, bibleVerses, plans, contentItems },
   });
 
   await db
@@ -78,6 +78,28 @@ async function main() {
         active: true,
       },
     ])
+    .onConflictDoNothing();
+
+  await db
+    .insert(contentItems)
+    .values({
+      churchId: null,
+      type: "devotional",
+      title: "Descansar en el Buen Pastor",
+      objective: "Recordar que Dios cuida de nosotros en medio de la incertidumbre.",
+      passage: "Salmos 23:1",
+      body:
+        "“Jehová es mi pastor; nada me faltará.” (Salmos 23:1)\n\n" +
+        "Texto bíblico: David describe a Dios como un pastor que provee y guía.\n\n" +
+        "Reflexión: en tus preocupaciones de hoy, ¿dónde podés confiar en que Dios " +
+        "provee? Esta es una lectura para meditar, no un reemplazo del " +
+        "acompañamiento de tu comunidad.\n\n" +
+        "Oración sugerida: Señor, ayudame a descansar en tu cuidado y a confiar en vos.",
+      author: "Equipo Camino de Fe",
+      origin: "human",
+      editorialStatus: "published",
+      publishedAt: new Date(),
+    })
     .onConflictDoNothing();
 
   console.log("Semillas cargadas correctamente.");
