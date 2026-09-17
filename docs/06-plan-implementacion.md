@@ -109,8 +109,9 @@ Prioridad: **P0** imprescindible · **P1** importante · **P2** deseable.
 
 ## G.5. Propuesta de despliegue
 
-- **Vercel** (Next.js front+API) con **previews por PR**; **Supabase** gestionado
-  (DB/Auth/Storage). Entornos separados dev/staging/prod con variables de entorno.
+- **Vercel** (Next.js front+API) con **previews por PR**; **Neon** gestionado (DB,
+  con branching por PR), **Auth.js** para auth y **Vercel Blob** para storage.
+  Entornos separados dev/staging/prod con variables de entorno.
 - **CI/CD**: en cada PR → typecheck + lint + unit + pruebas de autorización;
   en `main` → deploy a staging; promoción manual a prod.
 - **Migraciones** versionadas aplicadas de forma controlada; nunca datos de

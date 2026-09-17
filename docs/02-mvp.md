@@ -23,8 +23,8 @@ Todo lo que no sirva directamente a validar esto queda **fuera** del MVP.
 - Chat en lenguaje natural (español) con streaming de respuesta.
 - Respuestas que **distinguen** texto bíblico / interpretación / aplicación /
   recomendación de hablar con un pastor.
-- **RAG** sobre: traducción(es) bíblica(s) con licencia adecuada + declaración de
-  fe configurable + materiales autorizados iniciales.
+- **RAG** sobre: **Reina-Valera 1909 (dominio público)** + declaración de fe
+  configurable + materiales autorizados iniciales.
 - Sistema de citas con referencias verificables; no afirmar respaldo si no se
   verifica la cita.
 - Filtros de seguridad (crisis, no-diagnóstico, guardarraíles de identidad) y
@@ -34,7 +34,7 @@ Todo lo que no sirva directamente a validar esto queda **fuera** del MVP.
   rate limiting.
 
 ### Biblia
-- Lector bíblico (libro/capítulo/versículo) de la(s) traducción(es) licenciada(s).
+- Lector bíblico (libro/capítulo/versículo) sobre **RVR1909 (dominio público)**.
 - "Versículo del día"; continuar lectura; enlace desde citas del asistente.
 
 ### Mi Camino (espacio personal privado)

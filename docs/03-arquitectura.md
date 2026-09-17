@@ -12,20 +12,20 @@
              ┌──────────────────────────┼───────────────────────────┐
              │                          │                           │
      ┌───────▼────────┐        ┌────────▼─────────┐        ┌────────▼─────────┐
-     │ Next.js API /   │        │ Supabase Auth    │        │ Servicio de IA   │
-     │ Route Handlers  │◄──────►│ (JWT / sesiones) │        │ (backend propio) │
+     │ Next.js API /   │        │ Auth.js (NextAuth│        │ Servicio de IA   │
+     │ Route Handlers  │◄──────►│ v5) JWT/sesiones │        │ (backend propio) │
      │ (BFF + lógica)  │        └──────────────────┘        │  - Orquestación  │
      └───┬────────┬────┘                                    │  - RAG           │
          │        │                                         │  - Guardarraíles │
          │        │            ┌──────────────────┐         │  - Evaluación    │
-         │        └───────────►│ PostgreSQL       │         └───┬─────────┬────┘
-         │                     │ (Supabase)       │             │         │
+         │        └───────────►│ PostgreSQL (Neon)│         └───┬─────────┬────┘
+         │                     │  Drizzle ORM     │             │         │
          │                     │  + Row Level Sec │      ┌──────▼───┐ ┌───▼─────────┐
          │                     │  + pgvector      │◄─────┤ Retriever│ │ Proveedor    │
          │                     └──────────────────┘      │ (RAG)    │ │ LLM (adapter)│
          │                                               └──────────┘ └──────────────┘
          │              ┌──────────────────┐        ┌──────────────────┐
-         └─────────────►│ Supabase Storage │        │ Pagos (adapter)  │  (Fase 5)
+         └─────────────►│ Vercel Blob      │        │ Pagos (adapter)  │  (Fase 5)
                         │ (multimedia)     │        │ Mercado Pago/... │
                         └──────────────────┘        └──────────────────┘
 ```
@@ -36,12 +36,14 @@
 |------|----------|---------------|--------------|
 | Frontend | **Next.js (App Router) + TypeScript estricto + Tailwind** | SSR/streaming para el chat, PWA, un solo stack front+BFF, gran ecosistema. | Remix, SvelteKit |
 | UI/accesibilidad | **Radix UI / shadcn** + Tailwind | Componentes accesibles (WAI-ARIA), theming claro/oscuro. | Headless UI |
-| Auth + DB + Storage | **Supabase (Postgres + Auth + Storage + RLS)** | Postgres gestionado con RLS (clave multi-tenant), auth lista, storage con políticas; acelera el MVP. | Neon + Auth.js; Firebase (menos apto para RLS SQL) |
-| Vector store (RAG) | **pgvector en el mismo Postgres** | Menos infra, transaccional con el resto; suficiente para el corpus inicial. | Qdrant, Pinecone (si escala) |
+| Base de datos | **Neon (Postgres serverless)** + **Drizzle ORM** | Decidido. Postgres puro, autoscaling, branching por PR (encaja con Vercel previews); Drizzle da tipado estricto y migraciones versionadas. | Supabase, Neon+Prisma |
+| Autenticación | **Auth.js (NextAuth v5)** con adaptador Neon/Drizzle | Neon no incluye auth; Auth.js es estándar en Next.js, soporta email + OAuth y sesiones JWT. | Lucia, Clerk |
+| Storage | **Vercel Blob** | Neon no incluye storage; Vercel Blob se integra con el despliegue para multimedia. | S3/R2 |
+| Vector store (RAG) | **pgvector en Neon** | Neon soporta la extensión `pgvector`; menos infra y transaccional con el resto. | Qdrant, Pinecone (si escala) |
 | Servicio de IA | **Módulo/servicio desacoplado con interfaz `LLMProvider`** | Permite cambiar proveedor, controlar costos, aplicar guardarraíles y evaluación en un solo lugar. | — |
-| Proveedor LLM | **Adapter (decisión en H)** | No acoplar la lógica a un proveedor; elegir por costo/calidad/español. | Ver H |
+| Proveedor LLM | **Adapter (decisión pendiente en H)** | No acoplar la lógica a un proveedor; elegir por costo/calidad/español. | Ver H |
 | Pagos | **Adapter `PaymentProvider`** (Fase 5) | Empezar por Mercado Pago (AR) sin acoplar; checkout/tokenización, nunca guardar tarjetas. | Stripe (otros países) |
-| Despliegue | **Vercel** (front + API) + Supabase gestionado | Integración directa con Next.js, previews por PR, entornos. | Fly.io, Railway, contenedores |
+| Despliegue | **Vercel** (front + API) + Neon gestionado | Decidido. Integración directa con Next.js, previews por PR, entornos. | Fly.io, Railway |
 | Observabilidad | Logs estructurados + Sentry + métricas de IA propias | Errores, coste por usuario, calidad de respuestas. | Datadog, Grafana |
 
 > Antes de fijar cada elección definitivamente se evalúan **costos, límites,
@@ -52,7 +54,7 @@
 ```
 /app            → rutas Next.js (UI + API/route handlers)
 /components      → componentes UI reutilizables (accesibles)
-/lib            → utilidades, clientes (supabase, analytics)
+/lib            → utilidades, clientes (db/Neon, auth, analytics)
 /server         → lógica de dominio, autorización, validación (Zod)
   /ai           → servicio de IA: LLMProvider(adapter), RAG, guardarraíles, eval
   /payments     → PaymentProvider(adapter) [Fase 5]
@@ -103,11 +105,15 @@ Pregunta del usuario
 
 ## D.5. Seguridad y privacidad (plan)
 
-- **AuthN**: Supabase Auth (JWT, sesiones), verificación de email, OAuth.
-- **AuthZ**: políticas explícitas en `/server/authz` **y** RLS en Postgres
-  (defensa en profundidad). Nunca confiar solo en ocultar UI.
-- **Multi-tenant**: cada fila sensible lleva `tenant`/`church_id`; RLS filtra por
-  pertenencia y rol. Pruebas de autorización automatizadas por endpoint.
+- **AuthN**: Auth.js (NextAuth v5) con sesiones JWT, verificación de email, OAuth.
+- **AuthZ**: la **fuente de verdad es la capa de servidor** (`/server/authz`), que
+  se aplica en cada endpoint. Sobre Neon (a diferencia de Supabase) no hay un JWT
+  de base de datos: la RLS de Postgres se usa como **defensa en profundidad**
+  fijando el contexto por transacción (`SET LOCAL app.user_id / app.church_id`)
+  desde el backend autenticado. Nunca confiar solo en ocultar UI.
+- **Multi-tenant**: cada fila sensible lleva `tenant`/`church_id`; RLS + la capa de
+  autorización filtran por pertenencia y rol. Pruebas de autorización
+  automatizadas por endpoint.
 - **Validación** de todas las entradas con Zod en el servidor.
 - **Rate limiting** y detección de abuso en el asistente.
 - **Secretos** solo en variables de entorno / gestor de secretos; nunca en el repo.
@@ -122,7 +128,7 @@ Pregunta del usuario
 ## D.6. Costos (estimación de marco, a validar en H)
 
 Principales drivers de costo: **tokens de LLM** (entrada+salida+RAG),
-**embeddings**, infraestructura (Supabase/Vercel), storage. Controles:
+**embeddings**, infraestructura (Neon/Vercel), storage. Controles:
 - Límites por plan y por usuario; caché de respuestas y de embeddings del corpus.
 - Selección de modelo por tarea (barato para clasificación/embeddings; capaz para
   respuesta principal).

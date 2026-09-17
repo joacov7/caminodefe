@@ -18,7 +18,7 @@ estudiar, orar, descubrir iglesias y conectarse con la comunidad local —
 | A | [`docs/00-resumen-producto.md`](docs/00-resumen-producto.md) | Resumen ejecutivo, visión, usuarios, principios pastorales |
 | B | [`docs/01-oportunidades-riesgos.md`](docs/01-oportunidades-riesgos.md) | Análisis de oportunidades y mapa de riesgos (técnicos, pastorales, legales) |
 | C | [`docs/02-mvp.md`](docs/02-mvp.md) | Definición del MVP mínimo viable y qué queda fuera |
-| D | [`docs/03-arquitectura.md`](docs/03-arquitectura.md) | Arquitectura recomendada, stack, estrategia de IA/RAG, seguridad |
+| D | [`docs/03-arquitectura.md`](docs/03-arquitectura.md) | Arquitectura (Next.js + Neon + Drizzle + Auth.js + Vercel), estrategia de IA/RAG, seguridad |
 | E | [`docs/04-modelo-datos.md`](docs/04-modelo-datos.md) | Modelo de datos inicial, multi-tenant, diagrama de permisos |
 | F | [`docs/05-mapa-pantallas.md`](docs/05-mapa-pantallas.md) | Mapa de navegación y pantallas |
 | G | [`docs/06-plan-implementacion.md`](docs/06-plan-implementacion.md) | Plan por fases, backlog priorizado, criterios de aceptación, plan de pruebas |

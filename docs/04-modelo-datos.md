@@ -9,7 +9,8 @@
 
 ### Identidad y roles
 - **users** — `id`, `email`, `display_name`, `avatar_url`, `locale`,
-  `created_at`, `deleted_at` (soft delete). (Auth gestionada por Supabase.)
+  `created_at`, `deleted_at` (soft delete). (Auth gestionada por Auth.js/NextAuth
+  sobre Neon; incluye tablas `accounts`/`sessions`/`verification_tokens`.)
 - **user_settings** — `user_id`, preferencias de UI (tema), notificaciones,
   privacidad, recordatorios.
 - **roles** — catálogo de roles del sistema (visitante…responsable financiero).
@@ -49,8 +50,9 @@
 
 ### Biblia y RAG
 - **bible_versions** — `id`, `name`, `language`, `license`, `is_public_domain`.
+  Versión inicial: **Reina-Valera 1909 (RVR1909), dominio público** en español.
 - **bible_verses** — `version_id`, `book`, `chapter`, `verse`, `text`.
-  (Solo para versiones con licencia adecuada.)
+  (Solo versiones de dominio público o con licencia adecuada.)
 - **documents** — corpus RAG: `id`, `church_id?` (null = global), `type`
   (`bible|doctrine|study|sermon|other`), `title`, `source`, `license`,
   `editorial_status`, `created_by`.
