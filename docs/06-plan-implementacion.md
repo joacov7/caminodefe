@@ -65,6 +65,36 @@ iglesia local (panel pastoral, contenidos del pastor, eventos, solicitudes);
 > Nota de foco: no construir las tres a la vez. F1 (camino guiado) es la apuesta
 > principal de experiencia; F2 la refuerza; F3 llega con la capa de comunidad.
 
+- **Épica F4 — Comunidad juvenil cerrada (grupo exclusivo con propósito).**
+  NO una red social abierta (ver §15). Un **espacio cerrado, por iglesia o por
+  invitación, moderado por un líder real**, pensado para que los jóvenes se
+  acompañen y crezcan. Dos propósitos que lo hacen distinto de otra red:
+  - **Plantar y apoyar proyectos / emprendimientos.** Muchos jóvenes quieren
+    emprender y no pueden. Un tablero donde proponen ideas y proyectos y la
+    comunidad ayuda: mentoría, contactos, recursos, oración, ayuda práctica.
+    Sentido de pertenencia y utilidad concreta.
+  - **Acompañamiento en la vida.** Un lugar seguro para traer dificultades y
+    recibir apoyo de pares y del líder — **siempre derivando a ayuda humana y
+    profesional cuando corresponde** (aplica el flujo de crisis; no reemplaza
+    terapia ni al pastor).
+
+  No negociables (van antes que el crecimiento):
+  - **Seguridad de menores primero**: "jóvenes" incluye adolescentes. Grupos
+    cerrados y moderados; sin mensajería privada con desconocidos; el líder
+    siempre presente; reportar/bloquear; consentimiento parental cuando aplique
+    (ver nota de sección de niños). Revisar Ley 25.326 / safeguarding.
+  - **Moderación desde el día uno**: reglas claras, anti-acoso, anti-estafa,
+    anti-suplantación de pastores. Sin herramientas de moderación, no se abre.
+  - **Si un proyecto involucra dinero**, va por el módulo de aportes con
+    transparencia total (destinatario visible, sin promesas). Nada de recaudar
+    "por dentro" sin trazabilidad.
+  - **Cerrado y curado, no viral**: el valor es la pertenencia y el cuidado, no
+    el alcance. No competir con Instagram/TikTok; ser lo que ellos no dan.
+
+  Depende de: capa de comunidad + moderación + notificaciones. Se valida con el
+  grupo de jóvenes de una iglesia piloto. P: alta como diferencial, posterior al
+  MVP y a las herramientas de moderación.
+
 ## G.2. Backlog priorizado del MVP (épicas → historias)
 
 Prioridad: **P0** imprescindible · **P1** importante · **P2** deseable.
