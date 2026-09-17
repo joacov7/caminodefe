@@ -42,13 +42,12 @@ export interface LLMProvider {
 }
 
 /**
- * Selecciona el proveedor configurado. Por ahora solo lanza un error claro si se
- * intenta usar antes de implementar el adapter de OpenAI (Paso 3), evitando
- * "falsos verdes": el asistente NO está conectado todavía.
+ * Selecciona el proveedor configurado (OpenAI). Lanza un error claro si falta la
+ * API key, evitando "falsos verdes": el asistente no responde sin credenciales.
+ * La carga del adapter es diferida para no importar el SDK en entornos que no lo
+ * usan (p. ej. tests que inyectan un proveedor falso).
  */
-export function getLLMProvider(): LLMProvider {
-  throw new Error(
-    "El proveedor de IA (OpenAI) aún no está implementado (Paso 3). " +
-      "Configurá OPENAI_API_KEY y completá el adapter antes de usar el asistente.",
-  );
+export async function getLLMProvider(): Promise<LLMProvider> {
+  const { OpenAIProvider } = await import("./openai-provider");
+  return new OpenAIProvider();
 }

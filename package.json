@@ -16,7 +16,9 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx db/migrate.ts",
-    "db:seed": "tsx db/seed.ts"
+    "db:seed": "tsx db/seed.ts",
+    "db:import-bible": "tsx db/import-bible.ts",
+    "eval": "tsx server/ai/eval/run.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.3",
@@ -24,6 +26,7 @@
     "drizzle-orm": "^0.45.2",
     "next": "^15.1.6",
     "next-auth": "5.0.0-beta.29",
+    "openai": "^4.77.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "zod": "^3.24.1"
