@@ -173,6 +173,43 @@ export const churchMembers = pgTable(
   (t) => [primaryKey({ columns: [t.churchId, t.userId] })],
 );
 
+// Horarios de culto publicados por la iglesia.
+export const serviceTimes = pgTable(
+  "service_times",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    churchId: text("church_id")
+      .notNull()
+      .references(() => churches.id, { onDelete: "cascade" }),
+    day: text("day").notNull(), // p. ej. "domingo"
+    time: text("time").notNull(), // p. ej. "10:00"
+    label: text("label"),
+  },
+  (t) => [index("service_times_church_idx").on(t.churchId)],
+);
+
+// Eventos/agenda de la iglesia.
+export const churchEvents = pgTable(
+  "church_events",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    churchId: text("church_id")
+      .notNull()
+      .references(() => churches.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description"),
+    location: text("location"),
+    startsAt: timestamp("starts_at").notNull(),
+    visibility: text("visibility").default("public").notNull(), // public | members
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [index("church_events_church_idx").on(t.churchId)],
+);
+
 // Roles del usuario, con alcance de plataforma o de una iglesia específica.
 export const userRoles = pgTable(
   "user_roles",

@@ -15,6 +15,20 @@
       "when": 1789613362920,
       "tag": "0001_rls_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789646092399,
+      "tag": "0002_churches_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789646101843,
+      "tag": "0003_rls_church_content",
+      "breakpoints": true
     }
   ]
 }
