@@ -11,21 +11,16 @@ implementación del núcleo; las 🟠 pueden decidirse durante la Fase 1–2.
 - **Infraestructura (P4):** **Neon (Postgres) + Vercel.** Como Neon no incluye
   auth ni storage, se suman **Auth.js (NextAuth v5)** y **Vercel Blob**; ORM
   **Drizzle**. (Ver arquitectura actualizada en `docs/03`.)
+- **Proveedor de IA:** **OpenAI (GPT)** vía adapter `LLMProvider` (cambiable sin
+  tocar la lógica). La API key irá **solo** en variables de entorno, nunca al repo.
+- **Alcance del MVP:** **incluye iglesias** (perfil + "contactar a un pastor" +
+  panel pastoral mínimo), además de persona + asistente.
 
-## Bloqueantes pendientes 🔴
+> **No quedan preguntas bloqueantes.** Falta únicamente la **aprobación del
+> Product Owner** para iniciar la implementación (sección 28) y, para poner en
+> marcha el asistente, la **API key de OpenAI** cargada como secreto de entorno.
 
-1. **Proveedor de modelo de IA.** ¿Preferencia o restricción de proveedor
-   (Anthropic/OpenAI/Google/otro), presupuesto aproximado por usuario y región de
-   datos? La arquitectura lo desacopla vía adapter, pero necesito uno para
-   configurar el asistente y medir costos reales. ¿Hay cuenta/credenciales
-   disponibles, o querés que recomiende una opción por costo/calidad en español?
-
-2. **Alcance exacto del MVP (iglesias).** Propongo incluir **perfil de iglesia de
-   solo lectura + "contactar a un pastor" + panel pastoral mínimo**. ¿Lo
-   confirmás, o el primer MVP debe centrarse solo en persona+asistente y dejar
-   iglesias para Fase 4?
-
-## Importantes 🟠
+## Importantes 🟠 (no bloquean el inicio)
 
 3. **Datos personales y jurisdicción.** Mercado inicial Argentina (Ley 25.326) +
    otros países. ¿Hay asesoría legal para la política de privacidad, retención y
@@ -68,13 +63,12 @@ implementación del núcleo; las 🟠 pueden decidirse durante la Fase 1–2.
 
 ### Cómo propongo avanzar
 
-En cuanto confirmes las **2 preguntas bloqueantes pendientes** (proveedor de IA y
-alcance de iglesias en el MVP), puedo:
+Con las decisiones bloqueantes resueltas, al recibir tu **aprobación** puedo:
 1. Cerrar el alcance definitivo del MVP y el backlog de la Fase 1.
 2. Preparar el andamiaje del proyecto (Next.js + TS + Tailwind + Neon + Drizzle +
    Auth.js) **sin secretos**, con CI, migraciones base y RLS.
-3. Comenzar por el prototipo de UX y el esqueleto del asistente con un adapter de
-   IA configurable.
+3. Comenzar por el prototipo de UX y el esqueleto del asistente con el adapter
+   de OpenAI (la API key se cargará como secreto de entorno).
 
 **No iniciaré la implementación principal hasta tu aprobación** (según sección 28
 de la especificación).

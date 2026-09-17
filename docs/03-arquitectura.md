@@ -41,7 +41,7 @@
 | Storage | **Vercel Blob** | Neon no incluye storage; Vercel Blob se integra con el despliegue para multimedia. | S3/R2 |
 | Vector store (RAG) | **pgvector en Neon** | Neon soporta la extensión `pgvector`; menos infra y transaccional con el resto. | Qdrant, Pinecone (si escala) |
 | Servicio de IA | **Módulo/servicio desacoplado con interfaz `LLMProvider`** | Permite cambiar proveedor, controlar costos, aplicar guardarraíles y evaluación en un solo lugar. | — |
-| Proveedor LLM | **Adapter (decisión pendiente en H)** | No acoplar la lógica a un proveedor; elegir por costo/calidad/español. | Ver H |
+| Proveedor LLM | **OpenAI (GPT)** vía adapter `LLMProvider` | Decidido. Ecosistema maduro, buen español, embeddings propios para RAG. La interfaz permite migrar a otro proveedor sin tocar la lógica. API key **solo** en variables de entorno. | Anthropic, Google |
 | Pagos | **Adapter `PaymentProvider`** (Fase 5) | Empezar por Mercado Pago (AR) sin acoplar; checkout/tokenización, nunca guardar tarjetas. | Stripe (otros países) |
 | Despliegue | **Vercel** (front + API) + Neon gestionado | Decidido. Integración directa con Next.js, previews por PR, entornos. | Fly.io, Railway |
 | Observabilidad | Logs estructurados + Sentry + métricas de IA propias | Errores, coste por usuario, calidad de respuestas. | Datadog, Grafana |
