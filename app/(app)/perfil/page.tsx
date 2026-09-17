@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { signOutAction } from "@/lib/auth-actions";
 
 export const metadata: Metadata = { title: "Perfil" };
+export const dynamic = "force-dynamic";
 
-export default function PerfilPage() {
+export default async function PerfilPage() {
+  const session = await auth();
+  const user = session?.user;
+
   return (
     <main className="flex flex-col gap-6">
       <header>
@@ -13,12 +19,31 @@ export default function PerfilPage() {
         </p>
       </header>
 
-      <p className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-        Iniciá sesión para ver y editar tu perfil.{" "}
-        <Link href="/ingresar" className="font-medium text-primary hover:underline">
-          Ingresar
-        </Link>
-      </p>
+      {user ? (
+        <section className="flex items-center justify-between gap-4 rounded-2xl border border-border p-5">
+          <div>
+            <p className="font-medium">{user.name ?? "Tu cuenta"}</p>
+            {user.email && (
+              <p className="text-sm text-muted-foreground">{user.email}</p>
+            )}
+          </div>
+          <form action={signOutAction}>
+            <button
+              type="submit"
+              className="rounded-full border border-border px-4 py-2 text-sm transition hover:bg-muted"
+            >
+              Cerrar sesión
+            </button>
+          </form>
+        </section>
+      ) : (
+        <p className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+          Iniciá sesión para ver y editar tu perfil.{" "}
+          <Link href="/ingresar" className="font-medium text-primary hover:underline">
+            Ingresar
+          </Link>
+        </p>
+      )}
 
       <section className="grid grid-cols-1 gap-4">
         <Row title="Suscripción" desc="Plan Gratuito · Premium disponible (sin cobro en esta etapa)." />

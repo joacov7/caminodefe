@@ -15,6 +15,9 @@ implementación del núcleo; las 🟠 pueden decidirse durante la Fase 1–2.
   tocar la lógica). La API key irá **solo** en variables de entorno, nunca al repo.
 - **Alcance del MVP:** **incluye iglesias** (perfil + "contactar a un pastor" +
   panel pastoral mínimo), además de persona + asistente.
+- **Autenticación:** **Google (OAuth) + enlace mágico por correo** (Resend), vía
+  Auth.js. Sin contraseñas. Se habilita cargando las credenciales como secretos
+  (ver `.env.example`).
 
 > **No quedan preguntas bloqueantes.** Falta únicamente la **aprobación del
 > Product Owner** para iniciar la implementación (sección 28) y, para poner en

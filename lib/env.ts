@@ -21,6 +21,9 @@ const schema = z.object({
   AUTH_URL: z.string().url().optional(),
   GOOGLE_CLIENT_ID: z.string().min(1).optional(),
   GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+  // Enlace mágico por correo (Resend). `EMAIL_FROM` es el remitente verificado.
+  AUTH_RESEND_KEY: z.string().min(1).optional(),
+  EMAIL_FROM: z.string().min(1).optional(),
 
   // Proveedor de IA (OpenAI) — se usa en el servicio de IA (Paso 3)
   OPENAI_API_KEY: z.string().min(1).optional(),
