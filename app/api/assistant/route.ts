@@ -9,11 +9,13 @@ import { getLLMProvider } from "@/server/ai/provider";
 import { runAssistant } from "@/server/ai/assistant";
 import { retrieveByReference, dbFetchVerse } from "@/server/ai/rag";
 import { checkDailyLimit, usageDay } from "@/server/ai/limits";
+import { persistTurn } from "@/server/ai/conversations";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const bodySchema = z.object({
+  conversationId: z.string().min(1).optional(),
   messages: z
     .array(
       z.object({
@@ -24,6 +26,13 @@ const bodySchema = z.object({
     .min(1)
     .max(40),
 });
+
+function lastUserText(messages: { role: string; content: string }[]): string {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i]!.role === "user") return messages[i]!.content;
+  }
+  return "";
+}
 
 export async function POST(req: Request) {
   // 1. Autenticación (server-side).
@@ -93,7 +102,15 @@ export async function POST(req: Request) {
       country: "AR",
     });
 
-    // 6. Registrar uso (métricas técnicas, sin contenido personal).
+    // 6. Persistir el turno (historial privado) y registrar uso.
+    const conversationId = await persistTurn({
+      userId,
+      conversationId: parsed.data.conversationId,
+      userText: lastUserText(parsed.data.messages),
+      assistantText: result.text,
+      citations: result.citations,
+    });
+
     await db.insert(aiUsage).values({
       userId,
       day,
@@ -103,6 +120,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({
+      conversationId,
       text: result.text,
       flag: result.flag,
       citations: result.citations.map((c) => ({

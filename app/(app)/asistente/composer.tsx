@@ -10,8 +10,15 @@ type Turn = {
   crisis?: boolean;
 };
 
-export function Composer() {
-  const [turns, setTurns] = useState<Turn[]>([]);
+export function Composer({
+  conversationId: initialId,
+  initialTurns = [],
+}: {
+  conversationId?: string;
+  initialTurns?: Turn[];
+} = {}) {
+  const [turns, setTurns] = useState<Turn[]>(initialTurns);
+  const [conversationId, setConversationId] = useState<string | undefined>(initialId);
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +39,7 @@ export function Composer() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          conversationId,
           messages: history.map((t) => ({ role: t.role, content: t.content })),
         }),
       });
@@ -40,6 +48,7 @@ export function Composer() {
         setError(data?.error ?? "No se pudo obtener respuesta.");
         return;
       }
+      if (data.conversationId) setConversationId(data.conversationId);
       setTurns((prev) => [
         ...prev,
         {
