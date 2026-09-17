@@ -15,6 +15,27 @@
 > No se desarrollan todas las fases simultáneamente. Este documento detalla
 > **Fase 1–2**; el resto se planifica al llegar.
 
+### Ideas para fases futuras (backlog estratégico)
+
+**Sección de niños / interactiva (fase propia, más adelante).**
+Contenido lúdico para el ministerio de niños (historias bíblicas, memoria de
+versículos, quizzes, retos de lectura). Consideraciones **no negociables** antes
+de construir:
+- **IA + niños no se mezcla en vivo**: nada de chat generativo abierto frente a
+  un menor. Solo contenido **curado y pre-aprobado** por el flujo editorial.
+- **Datos de menores**: minimización extrema; sin recolectar datos personales del
+  niño. Progreso local en el dispositivo o bajo la cuenta de un adulto/familia.
+  Consentimiento parental; revisar Ley 25.326 (AR) y, si aplica, COPPA/GDPR-K.
+- **"Modo niños"** que activa un adulto; gamificación apropiada para la edad
+  (a diferencia de los adultos, donde se evita la competencia espiritual).
+- La IA, si aparece, solo del lado del adulto/creador para generar material que
+  luego se revisa; nunca en vivo con el niño.
+
+**Diferenciales candidatos (ver notas de producto).** Ser el "hogar digital de la
+iglesia local" (no otro lector bíblico), el puente humano (IA orienta → pastor
+acompaña), y una experiencia distintiva (camino guiado adaptativo, audio-first,
+momentos compartidos). Se validan con una iglesia piloto, no se declaran.
+
 ## G.2. Backlog priorizado del MVP (épicas → historias)
 
 Prioridad: **P0** imprescindible · **P1** importante · **P2** deseable.
