@@ -8,6 +8,7 @@ import { PageHeader, Stat, SectionTitle, EmptyState, Notice, ButtonLink } from "
 import { formatEventDate } from "@/lib/dates";
 import { ContactInbox } from "./contact-inbox";
 import { ChurchPicker } from "./church-picker";
+import { getChurchPlan } from "@/server/billing/church-plans";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Panel pastoral" };
@@ -42,7 +43,7 @@ export default async function PastoralPage({ searchParams }: { searchParams: Pro
       <PageHeader
         eyebrow="Panel pastoral"
         title={selected.name}
-        description="Las personas que pidieron contacto, tus próximos eventos y la actividad de tu comunidad."
+        description={`Las personas que pidieron contacto, tus próximos eventos y la actividad de tu comunidad. Plan ${getChurchPlan(selected.plan).name}.`}
         action={<ButtonLink href={`/iglesias/${selected.slug}`} variant="secondary">Ver perfil público</ButtonLink>}
       />
 

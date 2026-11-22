@@ -29,6 +29,12 @@ const schema = z.object({
   OPENAI_API_KEY: z.string().min(1).optional(),
   OPENAI_MODEL: z.string().min(1).default("gpt-4o-mini"),
   OPENAI_EMBEDDING_MODEL: z.string().min(1).default("text-embedding-3-small"),
+
+  // URL pública y pagos (opcionales).
+  NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
+  MERCADOPAGO_ACCESS_TOKEN: z.string().min(1).optional(),
+  MERCADOPAGO_WEBHOOK_SECRET: z.string().min(1).optional(),
+  DATABASE_DRIVER: z.enum(["neon", "pg"]).optional(),
 });
 
 export type Env = z.infer<typeof schema>;

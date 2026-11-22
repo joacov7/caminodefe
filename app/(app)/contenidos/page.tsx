@@ -12,7 +12,7 @@ export default async function ContenidosPage() {
   return (
     <main className="flex flex-col gap-6">
       <header>
-        <h1 className="text-2xl font-semibold">Contenidos</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">Contenidos</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Devocionales y estudios para acompañar tu camino.
         </p>

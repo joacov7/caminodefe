@@ -19,7 +19,7 @@ export default async function ConversationPage({
   if (!actor.userId) {
     return (
       <main className="flex flex-col gap-4">
-        <h1 className="text-2xl font-semibold">Conversación</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">Conversación</h1>
         <p className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
           Iniciá sesión para ver esta conversación.{" "}
           <Link href="/ingresar" className="font-medium text-primary hover:underline">

@@ -12,7 +12,7 @@ import { subscriptions, contributions } from "@/db/schema";
 import { getActor } from "@/server/authz/session";
 import { can } from "@/server/authz/permissions";
 import { donationSchema, type DonationInput } from "./donations";
-import { getPaymentProvider } from "@/server/payments/provider";
+import { getPaymentProvider, ManualProvider } from "@/server/payments/provider";
 
 export type ActionResult<T = undefined> =
   | { ok: true; data?: T }
@@ -78,17 +78,23 @@ export async function recordDonation(
   const d = parsed.data;
 
   try {
-    const provider = getPaymentProvider();
+    // Cobro real SOLO para sostener la plataforma: los aportes a iglesias y
+    // misiones requieren la cuenta propia de cada destinatario (fondos
+    // separados) y siguen registrándose como pendientes.
+    const provider = d.type === "platform" ? getPaymentProvider() : new ManualProvider();
+    const id = crypto.randomUUID();
     const checkout = await provider.createCheckout({
       userId,
       amountMinor: d.amountMinor,
       currency: d.currency,
-      concept: `Aporte (${d.type})`,
+      concept: d.type === "platform" ? "Aporte voluntario a Camino de Fe" : `Aporte (${d.type})`,
+      reference: id,
     });
 
     await getDb()
       .insert(contributions)
       .values({
+        id,
         userId,
         type: d.type,
         recipientChurchId: d.type === "church" ? d.recipientChurchId : null,

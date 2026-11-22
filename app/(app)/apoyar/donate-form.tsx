@@ -39,6 +39,11 @@ export function DonateForm() {
         note: note || undefined,
       });
       if (res.ok) {
+        // Con cobro real habilitado, se continúa en la página segura del proveedor.
+        if (res.data?.checkoutUrl) {
+          window.location.assign(res.data.checkoutUrl);
+          return;
+        }
         setDone(true);
         router.refresh();
       } else {

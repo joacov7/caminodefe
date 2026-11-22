@@ -13,7 +13,7 @@ export default async function PlanPage() {
   if (!actor.userId) {
     return (
       <main className="flex flex-col gap-4">
-        <h1 className="text-2xl font-semibold">Tu plan</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">Tu plan</h1>
         <p className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
           Iniciá sesión para ver y cambiar tu plan.{" "}
           <Link href="/ingresar" className="font-medium text-primary hover:underline">
@@ -30,7 +30,7 @@ export default async function PlanPage() {
   return (
     <main className="flex flex-col gap-6">
       <header>
-        <h1 className="text-2xl font-semibold">Tu plan</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">Tu plan</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Plan actual: <strong>{PLANS[isPremium ? "premium" : "free"].name}</strong>
         </p>

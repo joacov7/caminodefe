@@ -6,9 +6,10 @@
  * del cliente), evitando que alguien modifique eventos de otra iglesia.
  */
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { and, eq, gte, sql } from "drizzle-orm";
 import { getDb } from "@/db";
-import { auditLog, churchEvents } from "@/db/schema";
+import { auditLog, churchEvents, churches } from "@/db/schema";
+import { canAddUpcomingEvent, getChurchPlan } from "@/server/billing/church-plans";
 import { getActor } from "@/server/authz/session";
 import { can } from "@/server/authz/permissions";
 import { consumeRateLimit, RATE_LIMITS } from "@/server/platform/rate-limit";
@@ -34,6 +35,19 @@ export async function createEvent(churchId: string, input: EventInput): Promise<
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
   try {
     const db = getDb();
+    // Límite del plan de la iglesia (eventos próximos).
+    const [church] = await db.select({ plan: churches.plan }).from(churches).where(eq(churches.id, churchId)).limit(1);
+    const [{ n } = { n: 0 }] = await db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(churchEvents)
+      .where(and(eq(churchEvents.churchId, churchId), gte(churchEvents.startsAt, new Date())));
+    if (!canAddUpcomingEvent(church?.plan, n)) {
+      const plan = getChurchPlan(church?.plan);
+      return {
+        ok: false,
+        error: `Tu plan (${plan.name}) permite hasta ${plan.limits.upcomingEvents} eventos próximos. Podés borrar alguno o ampliar el plan.`,
+      };
+    }
     const [row] = await db
       .insert(churchEvents)
       .values({ churchId, createdBy: actor.userId, ...parsed.data })

@@ -37,7 +37,7 @@ export function MiCamino({
   return (
     <main className="flex flex-col gap-6">
       <header>
-        <h1 className="text-2xl font-semibold">Mi Camino</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">Mi espacio</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Privado. Nadie más (ni tu iglesia) ve esto por defecto.
         </p>

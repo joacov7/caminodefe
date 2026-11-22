@@ -2,13 +2,19 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { setChurchStatus } from "@/server/churches/actions";
+import { setChurchStatus, setChurchPlan } from "@/server/churches/actions";
+import { CHURCH_PLANS } from "@/server/billing/church-plans";
 
 type Church = {
   id: string;
   name: string;
   status: string;
   location: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  requester?: string | null;
+  requestedRole?: string | null;
+  plan?: string;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -33,10 +39,16 @@ export function VerificationRow({ church }: { church: Church }) {
   }
 
   return (
-    <li className="rounded-xl border border-border p-4">
+    <li className="rounded-2xl border border-border/80 bg-surface p-4">
       <div className="flex items-center justify-between gap-2">
         <div>
           <p className="font-medium">{church.name}</p>
+          {(church.contactEmail || church.requester) && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {church.requester && <>Solicitó: {church.requester}{church.requestedRole ? ` · rol: ${church.requestedRole}` : ""}<br /></>}
+              {church.contactEmail && <>Contacto: {church.contactEmail}{church.contactPhone ? ` · ${church.contactPhone}` : ""}</>}
+            </p>
+          )}
           {church.location && (
             <p className="text-xs text-muted-foreground">{church.location}</p>
           )}
@@ -72,6 +84,27 @@ export function VerificationRow({ church }: { church: Church }) {
         >
           Suspender
         </button>
+        <label className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+          Plan
+          <select
+            value={church.plan ?? "free"}
+            disabled={pending}
+            onChange={(e) =>
+              startTransition(async () => {
+                const r = await setChurchPlan(church.id, e.target.value);
+                if (r.ok) router.refresh();
+                else setError(r.error);
+              })
+            }
+            className="rounded-full border border-border bg-surface px-2 py-1 text-xs"
+          >
+            {Object.values(CHURCH_PLANS).map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
     </li>
   );

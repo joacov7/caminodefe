@@ -11,6 +11,7 @@ import { getDb } from "@/db";
 import { contactRequests, churches, auditLog, userRoles, churchMembers } from "@/db/schema";
 import { consumeRateLimit, RATE_LIMITS } from "@/server/platform/rate-limit";
 import { track } from "@/server/platform/analytics";
+import { isChurchPlanId } from "@/server/billing/church-plans";
 import { getActor } from "@/server/authz/session";
 import { can } from "@/server/authz/permissions";
 import {
@@ -184,5 +185,28 @@ export async function setChurchStatus(
     return { ok: true };
   } catch {
     return { ok: false, error: "No se pudo actualizar el estado." };
+  }
+}
+
+/** Admin asigna el plan de una iglesia (sin cobro aún; también para becas). */
+export async function setChurchPlan(churchId: string, plan: string): Promise<ActionResult> {
+  const actor = await getActor();
+  if (!can(actor, "plans:configure")) return { ok: false, error: "No autorizado." };
+  if (!isChurchPlanId(plan)) return { ok: false, error: "Plan inválido." };
+  try {
+    const db = getDb();
+    await db.update(churches).set({ plan }).where(eq(churches.id, churchId));
+    await db.insert(auditLog).values({
+      actorUserId: actor.userId,
+      action: "church.set_plan",
+      entity: "church",
+      entityId: churchId,
+      churchId,
+      metadata: { plan },
+    });
+    revalidatePath("/admin/iglesias");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "No se pudo actualizar el plan." };
   }
 }

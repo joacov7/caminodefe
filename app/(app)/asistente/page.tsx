@@ -16,7 +16,7 @@ export default function AsistentePage() {
     <main className="flex min-h-[70dvh] flex-col gap-6">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Asistente bíblico</h1>
+          <h1 className="font-serif text-3xl font-semibold tracking-tight">Asistente bíblico</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Una herramienta de orientación y estudio. Distingue el texto bíblico
             de su interpretación y no sustituye el acompañamiento pastoral.

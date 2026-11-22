@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { isRealPaymentEnabled } from "@/server/payments/provider";
 import Link from "next/link";
 import { getActor } from "@/server/authz/session";
 import { listMyContributions } from "@/server/billing/queries";
@@ -14,7 +15,7 @@ export default async function ApoyarPage() {
   if (!actor.userId) {
     return (
       <main className="flex flex-col gap-4">
-        <h1 className="text-2xl font-semibold">Apoyá Camino de Fe</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">Apoyá Camino de Fe</h1>
         <p className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
           Iniciá sesión para registrar un aporte.{" "}
           <Link href="/ingresar" className="font-medium text-primary hover:underline">
@@ -30,18 +31,25 @@ export default async function ApoyarPage() {
   return (
     <main className="flex flex-col gap-6">
       <header>
-        <h1 className="text-2xl font-semibold">Apoyá Camino de Fe</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">Apoyá Camino de Fe</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Tu aporte es voluntario y ayuda a sostener el proyecto. Sin presión ni
           promesas: das lo que quieras, cuando quieras.
         </p>
       </header>
 
-      <p className="rounded-xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
-        El cobro real todavía no está habilitado. Por ahora tu aporte se{" "}
-        <strong>registra como pendiente</strong> (no se procesa dinero) para que
-        podamos coordinar los medios de pago con transparencia.
-      </p>
+      {isRealPaymentEnabled() ? (
+        <p className="rounded-2xl bg-primary-soft px-4 py-3 text-sm">
+          Los aportes para <strong>sostener Camino de Fe</strong> se pagan en la página segura de Mercado Pago (no
+          guardamos datos de tarjeta). Los aportes a iglesias y misiones se registran y se coordinan con cada
+          destinatario.
+        </p>
+      ) : (
+        <p className="rounded-2xl bg-accent-soft px-4 py-3 text-sm">
+          El cobro real todavía no está habilitado. Por ahora tu aporte se <strong>registra como pendiente</strong> (no se
+          procesa dinero) para que podamos coordinar los medios de pago con transparencia.
+        </p>
+      )}
 
       <DonateForm />
 

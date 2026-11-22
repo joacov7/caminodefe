@@ -15,6 +15,9 @@
 > No se desarrollan todas las fases simultáneamente. Este documento detalla
 > **Fase 1–2**; el resto se planifica al llegar.
 
+> **Estado actualizado (22/11/2026):** ver `docs/EVOLUCION.md` (MVP completado,
+> diferenciación, monetización preparada y checklist de lanzamiento).
+
 ### Ideas para fases futuras (backlog estratégico)
 
 **Sección de niños / interactiva (fase propia, más adelante).**

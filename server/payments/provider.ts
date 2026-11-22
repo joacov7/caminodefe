@@ -8,11 +8,16 @@
  * checkout/tokenización, sin almacenar datos de tarjeta) en la Fase de Finanzas.
  */
 
+import { MercadoPagoProvider } from "./mercadopago";
+import { siteUrl } from "@/lib/site";
+
 export type CheckoutRequest = {
   userId: string;
   amountMinor: number;
   currency: string;
   concept: string;
+  /** Id del aporte registrado (referencia externa e idempotencia). */
+  reference?: string;
 };
 
 export type CheckoutResult = {
@@ -46,10 +51,14 @@ export class ManualProvider implements PaymentProvider {
  * `MERCADOPAGO_ACCESS_TOKEN` (u otro), acá se elige el proveedor real.
  */
 export function getPaymentProvider(): PaymentProvider {
+  const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
+  if (token) {
+    return new MercadoPagoProvider(token, siteUrl());
+  }
   return new ManualProvider();
 }
 
 /** ¿Hay cobro real habilitado en este entorno? */
 export function isRealPaymentEnabled(): boolean {
-  return false;
+  return Boolean(process.env.MERCADOPAGO_ACCESS_TOKEN);
 }

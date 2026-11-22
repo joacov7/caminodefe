@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { RichText } from "@/components/rich-text";
 
 type Citation = { ref: string; verified: boolean };
 type Turn = {
@@ -8,6 +9,12 @@ type Turn = {
   content: string;
   citations?: Citation[];
   crisis?: boolean;
+  source?: string;
+};
+
+const SOURCE_LABELS: Record<string, string> = {
+  library: "Respuesta revisada por el equipo pastoral",
+  cache: "Respuesta verificada reutilizada",
 };
 
 export function Composer({
@@ -56,6 +63,7 @@ export function Composer({
           content: data.text,
           citations: data.citations,
           crisis: data.flag === "crisis",
+          source: data.source,
         },
       ]);
     } catch {
@@ -74,15 +82,20 @@ export function Composer({
               key={i}
               className={
                 t.role === "user"
-                  ? "self-end rounded-2xl bg-primary px-4 py-2 text-sm text-primary-foreground"
-                  : `rounded-2xl border px-4 py-3 text-sm ${
+                  ? "max-w-[85%] self-end rounded-3xl rounded-br-lg bg-primary px-4 py-2.5 text-[0.95rem] text-primary-foreground"
+                  : `rounded-3xl rounded-bl-lg border px-4 py-3.5 text-[0.95rem] shadow-soft ${
                       t.crisis
                         ? "border-accent bg-accent/10"
-                        : "border-border bg-muted/40"
+                        : "border-border/80 bg-surface"
                     }`
               }
             >
-              <p className="whitespace-pre-wrap leading-relaxed">{t.content}</p>
+              <p className="whitespace-pre-wrap leading-relaxed">
+                {t.role === "assistant" ? <RichText text={t.content} /> : t.content}
+              </p>
+              {t.source && SOURCE_LABELS[t.source] && (
+                <p className="mt-2 text-xs font-medium text-primary">✓ {SOURCE_LABELS[t.source]}</p>
+              )}
               {t.citations && t.citations.length > 0 && (
                 <ul className="mt-2 flex flex-wrap gap-1.5">
                   {t.citations.map((c, j) => (
@@ -106,6 +119,14 @@ export function Composer({
               )}
             </li>
           ))}
+          {loading && (
+            <li aria-live="polite" className="flex items-center gap-1.5 self-start rounded-3xl border border-border/80 bg-surface px-4 py-3 text-sm text-muted-foreground">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary [animation-delay:150ms]" />
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary [animation-delay:300ms]" />
+              <span className="ml-1">Buscando en la Biblia…</span>
+            </li>
+          )}
         </ol>
       )}
 
@@ -135,7 +156,7 @@ export function Composer({
             disabled={!value.trim() || loading}
             className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition enabled:hover:opacity-90 disabled:opacity-50"
           >
-            {loading ? "…" : "Enviar"}
+            {loading ? "Pensando…" : "Enviar"}
           </button>
         </div>
         <p className="px-1 text-xs text-muted-foreground">

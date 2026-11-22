@@ -25,7 +25,7 @@ export default async function AdminContentPage() {
   return (
     <Shell>
       <header>
-        <h1 className="text-2xl font-semibold">Contenidos de plataforma</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">Contenidos de plataforma</h1>
         <p className="text-sm text-muted-foreground">
           Crear y publicar devocionales y estudios. Cada acción de publicación
           queda auditada.

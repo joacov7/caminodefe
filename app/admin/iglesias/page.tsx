@@ -25,7 +25,7 @@ export default async function AdminChurchesPage() {
   return (
     <Shell>
       <header>
-        <h1 className="text-2xl font-semibold">Verificación de iglesias</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">Verificación de iglesias</h1>
         <p className="text-sm text-muted-foreground">
           Aprobá, rechazá o suspendé iglesias. Cada acción queda auditada.
         </p>
@@ -47,6 +47,11 @@ export default async function AdminChurchesPage() {
                 name: c.name,
                 status: c.status,
                 location: c.generalLocation,
+                contactEmail: c.contact?.email ?? null,
+                contactPhone: c.contact?.phone ?? null,
+                requester: c.requesterName ? `${c.requesterName} (${c.requesterEmail ?? "sin correo"})` : c.requesterEmail,
+                requestedRole: c.contact?.requestedRole ?? null,
+                plan: c.plan,
               }}
             />
           ))}

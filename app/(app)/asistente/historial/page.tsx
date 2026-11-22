@@ -13,7 +13,7 @@ export default async function HistorialPage() {
   if (!actor.userId) {
     return (
       <main className="flex flex-col gap-4">
-        <h1 className="text-2xl font-semibold">Historial</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">Historial</h1>
         <p className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
           Iniciá sesión para ver tus conversaciones.{" "}
           <Link href="/ingresar" className="font-medium text-primary hover:underline">
@@ -34,7 +34,7 @@ export default async function HistorialPage() {
   return (
     <main className="flex flex-col gap-6">
       <header className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Historial</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">Historial</h1>
         <Link
           href="/asistente"
           className="rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground"

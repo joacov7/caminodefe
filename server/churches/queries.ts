@@ -93,6 +93,7 @@ export async function getChurchesByIds(ids: string[]) {
       name: churches.name,
       slug: churches.slug,
       status: churches.status,
+      plan: churches.plan,
     })
     .from(churches)
     .where(inArray(churches.id, ids))
@@ -110,8 +111,14 @@ export async function listAllChurches() {
       slug: churches.slug,
       status: churches.status,
       generalLocation: churches.generalLocation,
+      contact: churches.contact,
+      plan: churches.plan,
+      requesterName: users.name,
+      requesterEmail: users.email,
     })
     .from(churches)
+    // Quién solicitó el alta (para verificar identidad y rol antes de aprobar).
+    .leftJoin(users, sql`${users.id} = ${churches.contact}->>'requestedBy'`)
     .orderBy(desc(churches.createdAt))
     .limit(200);
 }

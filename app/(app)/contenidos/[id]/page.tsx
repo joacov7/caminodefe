@@ -48,7 +48,7 @@ export default async function ContenidoDetailPage({
       </div>
 
       <header>
-        <h1 className="text-2xl font-semibold">{item.title}</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">{item.title}</h1>
         {item.passage && (
           <p className="mt-1 text-sm text-primary">{item.passage}</p>
         )}

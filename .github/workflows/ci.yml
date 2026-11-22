@@ -56,3 +56,19 @@ jobs:
         env:
           # Valores dummy: el build no debe requerir secretos reales.
           NEXT_TELEMETRY_DISABLED: "1"
+
+      - name: E2E — fixtures, app real y Playwright
+        env:
+          DATABASE_DRIVER: pg
+          DATABASE_URL: ${{ env.TEST_DATABASE_URL }}
+          AUTH_SECRET: ci-e2e-secret-solo-para-pruebas-0123456789
+          AUTH_URL: http://localhost:3100
+          NEXT_PUBLIC_SITE_URL: http://localhost:3100
+        run: |
+          npm run db:fetch-bible
+          npx tsx db/import-bible.ts
+          npm run e2e:fixtures
+          npm i --no-save playwright && npx playwright install --with-deps chromium
+          (npx next start -p 3100 &)
+          for i in $(seq 1 60); do curl -sf http://localhost:3100/api/health && break; sleep 1; done
+          npm run e2e

@@ -25,6 +25,9 @@ para los entregables de producto y arquitectura (Fase 0).
 - `npm run typecheck` · `npm run lint` · `npm test`
 - `npm run db:generate` (migraciones desde el esquema)
 - `npm run db:migrate` · `npm run db:seed` (requieren `DATABASE_URL`)
+- `npm run db:fetch-bible` · `npm run db:import-bible` (RVR1909, dominio público)
+- Pruebas de integración: `TEST_DATABASE_URL=… npm test` (Postgres con rol NO superusuario)
+- E2E: `npm run e2e:fixtures` + app en :3100 con `DATABASE_DRIVER=pg` + `npm run e2e`
 
 ## Reglas no negociables
 - **Autorización en el servidor** (`server/authz`) + RLS como defensa en
@@ -36,3 +39,8 @@ para los entregables de producto y arquitectura (Fase 0).
   interpretación, y no afirma "respaldo bíblico" sin verificar la cita.
 - No presentar como terminada una función/integración que no fue implementada y
   probada.
+- Datos privados SIEMPRE con `withUserContext` (db/index.ts): esas tablas tienen
+  `FORCE ROW LEVEL SECURITY` y sin contexto no devuelven filas.
+- Contenido pastoral (camino, planes) vive en `content/` y se valida contra la
+  RVR1909; sin puntajes ni competencia espiritual.
+- Evolución y estado real: `docs/EVOLUCION.md`.
