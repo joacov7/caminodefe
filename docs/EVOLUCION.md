@@ -88,12 +88,45 @@ despliegue en Neon).
 - `npm test`: **108/108** (17 archivos; incluye integración con Postgres real)
 - `npm run e2e`: **20/20** pasos contra la app real
 
-### Riesgos y pendientes
+### Riesgos y pendientes (al cierre de la Fase 6; ver actualización en Fase 7)
 1. Migraciones y RLS no probadas aún contra **Neon** real (sí contra PG16).
 2. **OpenAI** y **Mercado Pago** sin prueba real (faltan credenciales).
-3. Purga física de conversaciones borradas (30 días) — pendiente.
-4. Notificaciones push (hoy recordatorio vía calendario) — pendiente, requiere
-   decisión de costos y consentimiento.
-5. Pedidos de oración con alcance y grupos (F4) — siguiente etapa; F4 requiere
+3. ~~Purga física de conversaciones borradas~~ → resuelto en Fase 7.
+4. Notificaciones push (hoy recordatorio vía calendario).
+5. ~~Pedidos de oración~~ → resuelto en Fase 7. Grupos (F4) requieren
    herramientas de moderación antes de abrir.
 6. Revisión legal y doctrinal del contenido antes del lanzamiento público.
+
+## Fase 7 — Comunidad y crecimiento (22/11/2026)
+
+| Entrega | Estado | Verificación |
+|---|---|---|
+| **Pedidos de oración** (RF-14): privados o compartidos con el equipo pastoral de una iglesia verificada de la que se es miembro; opción **sin mi nombre**; «Estamos orando»; «Dios respondió» con testimonio privado; incluidos en la exportación de datos | ✅ | integración (5 casos de acceso con RLS **compartida**, trigger que impide al pastor editar) + E2E |
+| **Invitación de iglesia** (RF-16): enlace corto `/i/<iglesia>`, QR en SVG (descargable y cartel A4 imprimible), bienvenida al llegar, conteo anónimo de aperturas | ✅ | unit + **QR decodificado con OpenCV** + E2E |
+| **Retención**: purga diaria de conversaciones borradas > 30 días, sesiones/tokens vencidos | ✅ | integración (no toca conversaciones activas ni recientes) |
+| **Sin conexión**: prueba automática de lectura bíblica offline | ✅ | E2E |
+
+**Defectos encontrados y corregidos en esta fase**
+- Sin conexión, abrir una página no guardada mostraba «Application error»: el
+  service worker servía HTML de Next bajo otra URL. Ahora usa una página
+  estática (`public/offline.html`). Se eliminó la ruta `/sin-conexion` (reemplazada).
+- Formulario de oración: si se escribía un segundo pedido mientras se guardaba
+  el primero, el texto nuevo se borraba.
+- Postgres exige política de lectura para `DELETE … RETURNING`: se agregó una
+  política acotada solo a conversaciones vencidas en modo mantenimiento (0014).
+
+**Dependencia nueva:** `qrcode-generator@2.0.4` (MIT, sin dependencias) para el QR.
+
+### Pruebas al cierre de la Fase 7
+- typecheck ✅ · lint ✅ · build ✅
+- `npm test`: **121/121** (20 archivos, con integración en Postgres real)
+- `npm run e2e`: **25/25**
+
+### Próximos pasos sugeridos
+1. Desplegar en Vercel + Neon con la iglesia piloto (checklist `docs/14`).
+2. Probar OpenAI real y correr `npm run eval`; cargar las primeras 20–30
+   respuestas de la biblioteca curada con el consejo.
+3. Mercado Pago en sandbox.
+4. Notificaciones push opt-in (Web Push) para recordatorios y «tu iglesia está
+   orando», con costos y consentimiento definidos.
+5. Herramientas de moderación → recién entonces grupos (F4).

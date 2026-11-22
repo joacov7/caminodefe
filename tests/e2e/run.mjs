@@ -191,6 +191,43 @@ await step("persona: ya aprobada, ve el evento de miembros y lo agenda", async (
   assert.match(ics, /SUMMARY:Reunión de líderes/);
 });
 
+// ---------------------------------------------------------------- Oración
+const PRAYER = `Por la salud de mi mamá ${Date.now()}`;
+const PRIVATE_PRAYER = `Pedido íntimo ${Date.now()}`;
+await step("oración: un pedido privado y uno compartido sin nombre con la iglesia", async () => {
+  await go(member, "/oracion");
+  await member.getByLabel("¿Por qué querés orar?").fill(PRIVATE_PRAYER);
+  await member.getByRole("button", { name: "Guardar pedido" }).click();
+  await member.getByText(PRIVATE_PRAYER).waitFor();
+  await member.getByLabel("¿Por qué querés orar?").fill(PRAYER);
+  await member.getByRole("radio", { name: /Pedirle a mi iglesia/ }).check();
+  await member.getByLabel("Compartir sin mi nombre").check();
+  await member.getByRole("button", { name: "Compartir pedido" }).click();
+  await member.getByText(PRAYER).waitFor();
+});
+await step("oración: el pastor ve solo el compartido, sin nombre, y marca «orando»", async () => {
+  await go(pastor, "/pastoral/oracion");
+  await pastor.getByText(PRAYER).waitFor();
+  const html = await pastor.content();
+  assert.ok(!html.includes(PRIVATE_PRAYER), "¡el pedido privado apareció al pastor!");
+  assert.ok(!html.includes("Lucía Prueba"), "¡se mostró el nombre en un pedido anónimo!");
+  await pastor.getByRole("button", { name: "Estamos orando" }).first().click();
+  await pastor.getByText("✓ Estamos orando").first().waitFor();
+  await go(member, "/oracion");
+  await member.getByText("Tu iglesia está orando").waitFor();
+});
+await step("invitación: QR y enlace corto llevan a la bienvenida de la iglesia", async () => {
+  await go(pastor, "/pastoral/invitar");
+  await pastor.getByRole("img", { name: /Código QR de invitación/ }).waitFor();
+  const svg = await (await pastor.request.get(`${BASE}/api/qr?iglesia=${CHURCH}`)).text();
+  assert.match(svg, /^<svg/);
+  const fresh = await as(null);
+  await go(fresh, `/i/${CHURCH}`);
+  assert.match(fresh.url(), /invitacion=1/);
+  await fresh.getByText(/Te invitaron desde Iglesia Comunidad de Prueba/).waitFor();
+  await fresh.context().close();
+});
+
 // ---------------------------------------------------------------- Admin
 const admin = await as("admin", false);
 await step("admin: métricas agregadas, auditoría y biblioteca curada", async () => {
@@ -234,6 +271,25 @@ await step("otra persona: elimina su cuenta y pierde el acceso", async () => {
   await other.context().close();
 });
 
+await step("PWA: la Biblia se lee sin conexión; lo personal no queda guardado", async () => {
+  const ctx = await browser.newContext({ ...devices["Pixel 7"] });
+  await ctx.addCookies([{ name: "authjs.session-token", value: TOKENS.member, url: BASE }]);
+  const p = await ctx.newPage();
+  await p.goto(BASE + "/biblia/salmos/23", { waitUntil: "networkidle" });
+  await p.evaluate(() => navigator.serviceWorker.ready);
+  await p.reload({ waitUntil: "networkidle" }); // ya controlada por el SW: se guarda la copia
+  await go(p, "/perfil");
+  await ctx.setOffline(true);
+  await p.goto(BASE + "/biblia/salmos/23");
+  await p.getByText("nada me faltará", { exact: false }).first().waitFor();
+  await p.goto(BASE + "/perfil");
+  await p.getByRole("heading", { name: "Estás sin conexión" }).waitFor();
+  await ctx.close();
+});
+await step("tarea programada protegida por secreto", async () => {
+  const r = await anon.request.get(BASE + "/api/cron/mantenimiento");
+  assert.equal(r.status(), 401);
+});
 await step("sin errores de JavaScript en el navegador", async () => {
   const errs = [anon, member, pastor, admin].flatMap((p) => p.errors);
   assert.deepEqual(errs, []);

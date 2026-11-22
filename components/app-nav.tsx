@@ -13,6 +13,7 @@ import {
   IconBookmark,
   IconUser,
   IconFlame,
+  IconHeart,
 } from "./icons";
 
 type NavItem = { href: string; label: string; icon: React.ReactNode; match?: string[] };
@@ -27,7 +28,7 @@ const mobile: NavItem[] = [
     href: "/perfil",
     label: "Más",
     icon: <IconGrid />,
-    match: ["/perfil", "/iglesias", "/eventos", "/planes", "/mi-camino", "/plan", "/apoyar", "/contenidos"],
+    match: ["/perfil", "/iglesias", "/eventos", "/planes", "/oracion", "/mi-camino", "/plan", "/apoyar", "/contenidos"],
   },
 ];
 
@@ -39,6 +40,7 @@ const desktop: { title: string; items: NavItem[] }[] = [
       { href: "/biblia", label: "Biblia", icon: <IconBook /> },
       { href: "/camino", label: "Camino guiado", icon: <IconPath /> },
       { href: "/planes", label: "Planes de lectura", icon: <IconFlame /> },
+      { href: "/oracion", label: "Oración", icon: <IconHeart /> },
       { href: "/asistente", label: "Asistente bíblico", icon: <IconChat /> },
     ],
   },

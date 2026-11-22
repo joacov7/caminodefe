@@ -66,6 +66,7 @@ export default async function PerfilPage() {
           <LinkRow href="/iglesias" title="Iglesias" desc="Encontrá una comunidad cerca" icon={<IconChurch />} />
           <LinkRow href="/eventos" title="Eventos" desc="Actividades abiertas" icon={<IconCalendar />} />
           <LinkRow href="/planes" title="Planes de lectura" desc="7 y 30 días" icon={<IconFlame />} />
+          <LinkRow href="/oracion" title="Oración" desc="Tus pedidos, privados o con tu iglesia" icon={<IconHeart />} />
           <LinkRow href="/contenidos" title="Devocionales y estudios" desc="Para tu día a día" icon={<IconSparkle />} />
         </div>
       </section>

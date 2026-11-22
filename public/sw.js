@@ -7,20 +7,21 @@
  *   y copia local para leer sin conexión.
  * - NUNCA se guardan páginas con datos personales (/perfil, /mi-camino,
  *   /asistente, /camino, /planes, /pastoral, /admin) ni respuestas de /api.
- * - Sin red y sin copia: /sin-conexion.
+ * - Sin red y sin copia: /offline.html (estática, sin JavaScript).
  */
-const VERSION = "cdf-v1";
+const VERSION = "cdf-v3";
 const STATIC = `${VERSION}-static`;
 const PAGES = `${VERSION}-pages`;
-const OFFLINE_URL = "/sin-conexion";
+// Página estática (sin JS): funciona aunque falten recursos de la app.
+const OFFLINE_URL = "/offline.html";
 
-const CACHEABLE_PAGES = [/^\/biblia(\/|$)/, /^\/contenidos(\/|$)/, /^\/privacidad$/, /^\/sin-conexion$/];
+const CACHEABLE_PAGES = [/^\/biblia(\/|$)/, /^\/contenidos(\/|$)/, /^\/privacidad$/];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(PAGES)
-      .then((c) => c.addAll([OFFLINE_URL, "/biblia"]))
+      .then((c) => c.addAll([OFFLINE_URL, "/icon.svg", "/biblia"]))
       .then(() => self.skipWaiting()),
   );
 });
@@ -85,6 +86,8 @@ self.addEventListener("fetch", (event) => {
           const hit = await caches.match(req);
           if (hit) return hit;
         }
+        // Página estática precacheada (servir HTML de Next bajo otra URL
+        // rompe la hidratación; esta no tiene JavaScript).
         if (req.mode === "navigate") {
           const offline = await caches.match(OFFLINE_URL);
           if (offline) return offline;

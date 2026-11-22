@@ -22,6 +22,8 @@ export const ANALYTICS_EVENTS = [
   "event_view",
   "event_calendar_added",
   "signup",
+  "prayer_request_created",
+  "church_invite_opened",
 ] as const;
 export type AnalyticsEvent = (typeof ANALYTICS_EVENTS)[number];
 

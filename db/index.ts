@@ -60,9 +60,34 @@ export function dbOrNull(): Db | null {
   }
 }
 
-function setUserContext(db: Db, userId: string) {
+/** Variables de sesión permitidas (lista cerrada: nada viene del cliente). */
+type ContextSetting = "app.user_id" | "app.maintenance";
+
+function setContext(db: Db, settings: Partial<Record<ContextSetting, string>>) {
+  const entries = Object.entries(settings) as [ContextSetting, string][];
   // `is_local = true`: el valor vive solo dentro de esta transacción.
-  return db.execute(sql`select set_config('app.user_id', ${userId}, true)`);
+  const parts = entries.map(([k, v]) => sql`set_config(${k}, ${v}, true)`);
+  return db.execute(sql`select ${sql.join(parts, sql`, `)}`);
+}
+
+async function withContext<U extends BatchItem<"pg">, T extends Readonly<[U, ...U[]]>>(
+  settings: Partial<Record<ContextSetting, string>>,
+  build: (db: Db) => T,
+): Promise<BatchResponse<T>> {
+  const db = getDb();
+  if (_driver === "pg") {
+    const pgDb = db as unknown as {
+      transaction<R>(fn: (tx: Db) => Promise<R>): Promise<R>;
+    };
+    return pgDb.transaction(async (tx) => {
+      await setContext(tx, settings);
+      const out: unknown[] = [];
+      for (const q of build(tx)) out.push(await q);
+      return out as BatchResponse<T>;
+    });
+  }
+  const [, ...rest] = await db.batch([setContext(db, settings), ...build(db)] as unknown as Readonly<[U, ...U[]]>);
+  return rest as unknown as BatchResponse<T>;
 }
 
 /**
@@ -78,23 +103,19 @@ export async function withUserContext<
   T extends Readonly<[U, ...U[]]>,
 >(userId: string, build: (db: Db) => T): Promise<BatchResponse<T>> {
   if (!userId) throw new Error("withUserContext requiere un userId.");
-  const db = getDb();
-  if (_driver === "pg") {
-    const pgDb = db as unknown as {
-      transaction<R>(fn: (tx: Db) => Promise<R>): Promise<R>;
-    };
-    return pgDb.transaction(async (tx) => {
-      await setUserContext(tx, userId);
-      const out: unknown[] = [];
-      for (const q of build(tx)) out.push(await q);
-      return out as BatchResponse<T>;
-    });
-  }
-  const [, ...rest] = await db.batch([
-    setUserContext(db, userId),
-    ...build(db),
-  ] as unknown as Readonly<[U, ...U[]]>);
-  return rest as unknown as BatchResponse<T>;
+  return withContext({ "app.user_id": userId }, build);
+}
+
+/**
+ * Tareas de mantenimiento (retención de datos). Solo habilita las políticas
+ * RLS de mantenimiento (p. ej. `conversations_purge`), que permiten borrar
+ * ÚNICAMENTE datos ya vencidos. Nunca usar desde acciones de usuario.
+ */
+export async function withMaintenanceContext<
+  U extends BatchItem<"pg">,
+  T extends Readonly<[U, ...U[]]>,
+>(build: (db: Db) => T): Promise<BatchResponse<T>> {
+  return withContext({ "app.maintenance": "purge" }, build);
 }
 
 export { schema };

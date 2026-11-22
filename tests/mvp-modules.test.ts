@@ -136,3 +136,19 @@ describe("plataforma", () => {
     expect(sanitizeDim(undefined)).toBe("");
   });
 });
+
+import { prayerSchema } from "@/server/prayer/validation";
+describe("pedidos de oración (validación)", () => {
+  it("privado por defecto: ignora iglesia y anonimato", () => {
+    const r = prayerSchema.parse({ body: "Por mi familia", scope: "private", churchId: "x", anonymous: true });
+    expect(r).toEqual({ body: "Por mi familia", scope: "private", churchId: null, anonymous: false });
+  });
+  it("compartir exige iglesia y conserva el anonimato elegido", () => {
+    expect(prayerSchema.safeParse({ body: "Por mi trabajo", scope: "church" }).success).toBe(false);
+    expect(prayerSchema.parse({ body: "Por mi trabajo", scope: "church", churchId: "c1", anonymous: true }).anonymous).toBe(true);
+  });
+  it("rechaza pedidos vacíos o demasiado largos", () => {
+    expect(prayerSchema.safeParse({ body: "  ", scope: "private" }).success).toBe(false);
+    expect(prayerSchema.safeParse({ body: "x".repeat(2001), scope: "private" }).success).toBe(false);
+  });
+});

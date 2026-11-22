@@ -672,3 +672,36 @@ export const analyticsDaily = pgTable(
   },
   (t) => [primaryKey({ columns: [t.day, t.event, t.dim] })],
 );
+
+// ---------------------------------------------------------------------------
+// Pedidos de oración. La PERSONA elige el alcance:
+//   - "private": solo ella (diario de oración).
+//   - "church":  también el equipo pastoral de UNA iglesia de la que es miembro.
+// Nunca públicos ni visibles para otros miembros. RLS forzada (0011).
+// ---------------------------------------------------------------------------
+export const prayerRequests = pgTable(
+  "prayer_requests",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    churchId: text("church_id").references(() => churches.id, { onDelete: "set null" }),
+    scope: text("scope").default("private").notNull(), // private | church
+    // Compartido sin nombre: el equipo pastoral ve el pedido pero no quién lo hizo.
+    anonymous: boolean("anonymous").default(false).notNull(),
+    body: text("body").notNull(),
+    // open → praying (el equipo está orando) → answered (la persona lo marca)
+    status: text("status").default("open").notNull(),
+    // Testimonio opcional al marcar como respondido (privado como el pedido).
+    answerNote: text("answer_note"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => [
+    index("prayer_requests_user_idx").on(t.userId),
+    index("prayer_requests_church_idx").on(t.churchId),
+  ],
+);

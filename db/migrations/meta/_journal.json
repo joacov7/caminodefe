@@ -78,6 +78,34 @@
       "when": 1795350368251,
       "tag": "0010_rls_y_busqueda",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795376922316,
+      "tag": "0011_pedidos_de_oracion",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1795376922860,
+      "tag": "0012_rls_oracion_y_purga",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795376952391,
+      "tag": "0013_oracion_anonima",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795377222028,
+      "tag": "0014_purga_lectura",
+      "breakpoints": true
     }
   ]
 }

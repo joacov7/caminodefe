@@ -35,6 +35,8 @@ const schema = z.object({
   MERCADOPAGO_ACCESS_TOKEN: z.string().min(1).optional(),
   MERCADOPAGO_WEBHOOK_SECRET: z.string().min(1).optional(),
   DATABASE_DRIVER: z.enum(["neon", "pg"]).optional(),
+  // Secreto que Vercel Cron envía a /api/cron/mantenimiento.
+  CRON_SECRET: z.string().min(16).optional(),
 });
 
 export type Env = z.infer<typeof schema>;

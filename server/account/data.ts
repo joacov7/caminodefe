@@ -20,6 +20,7 @@ import {
   subscriptions,
   churchMembers,
   auditLog,
+  prayerRequests,
 } from "@/db/schema";
 import { inArray } from "drizzle-orm";
 
@@ -36,7 +37,7 @@ export async function exportUserData(userId: string) {
     db.select().from(subscriptions).where(eq(subscriptions.userId, userId)),
     db.select().from(churchMembers).where(eq(churchMembers.userId, userId)),
   ]);
-  const [notes, journal, favorites, convs, path, plans, reminders] = await withUserContext(userId, (d) => [
+  const [notes, journal, favorites, convs, path, plans, reminders, prayers] = await withUserContext(userId, (d) => [
     d.select().from(userNotes).where(eq(userNotes.userId, userId)),
     d.select().from(userJournal).where(eq(userJournal.userId, userId)),
     d.select().from(userFavorites).where(eq(userFavorites.userId, userId)),
@@ -44,6 +45,7 @@ export async function exportUserData(userId: string) {
     d.select().from(guidedPathProgress).where(eq(guidedPathProgress.userId, userId)),
     d.select().from(readingPlanDays).where(eq(readingPlanDays.userId, userId)),
     d.select().from(reminderPrefs).where(eq(reminderPrefs.userId, userId)),
+    d.select().from(prayerRequests).where(eq(prayerRequests.userId, userId)),
   ]);
   const convIds = convs.map((c) => c.id);
   const msgs = convIds.length
@@ -65,6 +67,7 @@ export async function exportUserData(userId: string) {
     guidedPath: path,
     readingPlans: plans,
     reminders,
+    prayerRequests: prayers,
     contactRequests: contacts,
     contributions: gifts,
     subscriptions: subs,

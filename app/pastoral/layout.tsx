@@ -7,7 +7,9 @@ export default function PastoralLayout({ children }: { children: React.ReactNode
       tabs={[
         { href: "/pastoral", label: "Bandeja" },
         { href: "/pastoral/eventos", label: "Eventos" },
+        { href: "/pastoral/oracion", label: "Oración" },
         { href: "/pastoral/miembros", label: "Miembros" },
+        { href: "/pastoral/invitar", label: "Invitar" },
       ]}
     >
       {children}

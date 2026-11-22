@@ -7,8 +7,8 @@ hoy**; la política pública está en `/privacidad` (borrador sujeto a revisión
 
 | Clase | Datos | Quién accede | Protección |
 |---|---|---|---|
-| Privado personal | conversaciones, mensajes, citas, notas, diario, favoritos, progreso del camino y reflexiones, días de planes, recordatorios | **Solo la persona** | Filtro por `userId` en servidor + `FORCE RLS` (0008, 0010) + `withUserContext` |
-| Compartido por decisión de la persona | mensajes a una iglesia, solicitud de membresía (nombre y correo) | Equipo pastoral de **esa** iglesia | `can()` por iglesia; roles válidos solo con iglesia verificada |
+| Privado personal | conversaciones, mensajes, citas, notas, diario, favoritos, progreso del camino y reflexiones, días de planes, recordatorios, pedidos de oración privados | **Solo la persona** | Filtro por `userId` en servidor + `FORCE RLS` (0008, 0010) + `withUserContext` |
+| Compartido por decisión de la persona | mensajes a una iglesia, solicitud de membresía (nombre y correo), pedidos de oración compartidos (con o sin nombre; el pastor solo puede marcar «orando», garantizado por un trigger en la base) | Equipo pastoral de **esa** iglesia | `can()` por iglesia; roles válidos solo con iglesia verificada |
 | Operativo | iglesias, eventos, horarios, contenidos publicados | Público / gestores | Escritura con `can()` + auditoría |
 | Técnico sin contenido | `ai_usage` (tokens, costo), `rate_limits` (claves hasheadas), `audit_log` | Admin | Sin texto del usuario; IP nunca en claro |
 | Anónimo agregado | `analytics_daily` (evento + día + conteo) | Admin | Sin identificadores ni cookies |
@@ -23,7 +23,10 @@ hoy**; la política pública está en `/privacidad` (borrador sujeto a revisión
 ## Conservación
 - Datos personales: mientras exista la cuenta.
 - Conversaciones borradas por la persona: borrado lógico inmediato (no se
-  muestran ni se usan). **Pendiente:** purga física programada a 30 días.
+  muestran ni se usan) y **purga física a los 30 días** (tarea diaria
+  `/api/cron/mantenimiento`, Vercel Cron). La base solo permite ese borrado a
+  conversaciones vencidas, en modo mantenimiento (políticas 0012/0014).
+- Sesiones y tokens de verificación vencidos: purga diaria.
 - `rate_limits`: limpieza oportunista de ventanas > 24 h.
 - Caché del asistente: solo preguntas generales sin datos personales; invalidable.
 

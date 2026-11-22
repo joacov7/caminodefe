@@ -22,8 +22,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return { title: church.name, description, openGraph: { title: church.name, description } };
 }
 
-export default async function ChurchProfilePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ChurchProfilePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ invitacion?: string }>;
+}) {
   const { slug } = await params;
+  const { invitacion } = await searchParams;
   const church = await getVerifiedChurchBySlug(slug);
   if (!church) notFound();
   const actor = await getActor();
@@ -41,6 +48,24 @@ export default async function ChurchProfilePage({ params }: { params: Promise<{ 
           <IconArrowLeft className="h-4 w-4" /> Iglesias
         </Link>
       </nav>
+
+      {invitacion && (
+        <section aria-label="Bienvenida" className="rounded-3xl bg-accent-soft p-5 animate-rise">
+          <p className="font-serif text-xl font-semibold">¡Bienvenido/a! Te invitaron desde {church.name}.</p>
+          <p className="mt-1 text-sm text-foreground/80">
+            Camino de Fe te ayuda a leer la Biblia cada día y a estar conectado/a con tu iglesia. Es gratis y lo que
+            escribís es privado.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link href="/planes/esperanza-7-dias" className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+              Empezar «Esperanza en 7 días»
+            </Link>
+            <Link href="/camino" className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold">
+              Conocer el camino guiado
+            </Link>
+          </div>
+        </section>
+      )}
 
       <header className="relative overflow-hidden rounded-4xl bg-primary px-6 py-8 text-primary-foreground shadow-lift sm:px-8">
         <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-10 h-60 w-60 rounded-full bg-accent/40 blur-3xl" />
