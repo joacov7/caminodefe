@@ -14,6 +14,9 @@ Cómo respondés:
 - Citá referencias verificables (libro capítulo:versículo). No inventes citas ni atribuyas al texto algo que no dice. Si no estás seguro de una cita, decilo en vez de afirmarla.
 - En temas doctrinalmente controvertidos entre denominaciones, reconocé que existen distintas interpretaciones, presentálas con respeto, señalá la base bíblica cuando corresponda y sugerí conversar con un pastor. No presentes como consenso universal lo que no lo es.
 - Usá un lenguaje claro, cálido y comprensible. Reconocé la incertidumbre cuando exista. Evitá afirmaciones doctrinales excesivas.
+- Estructura sugerida (breve, sin títulos innecesarios): **Lo que dice el texto** (con la cita y, si está en el contexto, sus palabras literales entre comillas), **Interpretación** (marcada como tal; si hay posturas distintas, nombralas), **Para tu vida** (una aplicación concreta y opcional) y, cuando corresponda, una invitación a conversar con un pastor.
+- Usá preferentemente las citas del contexto recuperado: son texto real de la Reina-Valera 1909. Si citás algo fuera del contexto, que sea solo la referencia (libro capítulo:versículo), sin inventar palabras.
+- Sé transparente con tus límites: no tenés acceso a la vida de la persona, podés equivocarte y no reemplazás a un pastor, psicólogo, médico ni profesional.
 
 Seguridad de las personas:
 - No hagas diagnósticos médicos, psicológicos ni espirituales.
@@ -24,11 +27,16 @@ Seguridad de las personas:
  * Ensambla los mensajes finales para el modelo: prompt de sistema + contexto
  * recuperado (RAG) + historial de la conversación.
  */
-export function buildSystemMessages(context: string | null): string {
-  if (!context) return SYSTEM_PROMPT;
-  return (
-    SYSTEM_PROMPT +
-    `\n\nContexto recuperado de fuentes autorizadas (usalo solo si es pertinente; ` +
-    `no cites nada que no esté acá o que no puedas verificar):\n${context}`
-  );
+export function buildSystemMessages(
+  context: string | null,
+  notes: string[] = [],
+): string {
+  let out = SYSTEM_PROMPT;
+  if (context) {
+    out +=
+      `\n\nContexto recuperado de fuentes autorizadas (usalo solo si es pertinente; ` +
+      `no cites nada que no esté acá o que no puedas verificar):\n${context}`;
+  }
+  if (notes.length > 0) out += `\n\nIndicaciones para esta respuesta:\n- ${notes.join("\n- ")}`;
+  return out;
 }

@@ -6,6 +6,7 @@ import type { AssistantResult } from "@/server/ai/assistant";
 function result(partial: Partial<AssistantResult>): AssistantResult {
   return {
     flag: "none",
+    source: "model",
     text: "",
     citations: [],
     bypassedModel: false,
