@@ -11,6 +11,7 @@ import {
   churchEvents,
   churchMembers,
   contactRequests,
+  users,
 } from "@/db/schema";
 
 function dbOrNull() {
@@ -183,4 +184,74 @@ export async function getChurchStats(churchId: string) {
     events: count(events?.n),
     pendingRequests: count(pending?.n),
   };
+}
+
+/**
+ * Personas vinculadas a una iglesia (para su equipo pastoral). Solo nombre y
+ * correo — datos que la persona compartió al pedir ser miembro. Nunca datos
+ * privados (diario, notas, conversaciones, progreso).
+ */
+export async function listChurchMembers(churchId: string) {
+  const db = dbOrNull();
+  if (!db) return [];
+  return db
+    .select({
+      userId: churchMembers.userId,
+      status: churchMembers.status,
+      linkedAt: churchMembers.linkedAt,
+      name: users.name,
+      email: users.email,
+    })
+    .from(churchMembers)
+    .innerJoin(users, eq(users.id, churchMembers.userId))
+    .where(and(eq(churchMembers.churchId, churchId), inArray(churchMembers.status, ["requested", "active"])))
+    .orderBy(desc(churchMembers.linkedAt))
+    .limit(500);
+}
+
+/** Iglesias con las que la persona está vinculada (su propia vista). */
+export async function listMyChurches(userId: string) {
+  const db = dbOrNull();
+  if (!db) return [];
+  return db
+    .select({
+      churchId: churchMembers.churchId,
+      status: churchMembers.status,
+      name: churches.name,
+      slug: churches.slug,
+    })
+    .from(churchMembers)
+    .innerJoin(churches, eq(churches.id, churchMembers.churchId))
+    .where(and(eq(churchMembers.userId, userId), inArray(churchMembers.status, ["requested", "active"])));
+}
+
+export async function getMembershipStatus(userId: string, churchId: string) {
+  const db = dbOrNull();
+  if (!db) return null;
+  const rows = await db
+    .select({ status: churchMembers.status })
+    .from(churchMembers)
+    .where(and(eq(churchMembers.userId, userId), eq(churchMembers.churchId, churchId)))
+    .limit(1);
+  return rows[0]?.status ?? null;
+}
+
+/** Solicitudes de contacto de la propia persona (para verlas y retirarlas). */
+export async function listMyContactRequests(userId: string) {
+  const db = dbOrNull();
+  if (!db) return [];
+  return db
+    .select({
+      id: contactRequests.id,
+      reason: contactRequests.reason,
+      status: contactRequests.status,
+      createdAt: contactRequests.createdAt,
+      churchName: churches.name,
+      churchSlug: churches.slug,
+    })
+    .from(contactRequests)
+    .innerJoin(churches, eq(churches.id, contactRequests.churchId))
+    .where(eq(contactRequests.userId, userId))
+    .orderBy(desc(contactRequests.createdAt))
+    .limit(50);
 }

@@ -1,33 +1,42 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Identidad visual de Camino de Fe: cálida, moderna, espiritual sin recargar.
+ * Identidad visual de Camino de Fe (v2): cálida, serena, moderna.
  * Los colores se exponen como variables CSS (ver app/globals.css) para soportar
- * modo claro/oscuro con `class`.
+ * modo claro/oscuro (preferencia del sistema o `data-theme`).
  */
+const token = (name: string) => `hsl(var(--${name}) / <alpha-value>)`;
+
 const config: Config = {
-  darkMode: "class",
-  content: [
-    "./app/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-  ],
+  darkMode: ["selector", '[data-theme="dark"]'],
+  content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        // Tokens semánticos mapeados a variables CSS.
-        background: "hsl(var(--background) / <alpha-value>)",
-        foreground: "hsl(var(--foreground) / <alpha-value>)",
-        muted: "hsl(var(--muted) / <alpha-value>)",
-        "muted-foreground": "hsl(var(--muted-foreground) / <alpha-value>)",
-        border: "hsl(var(--border) / <alpha-value>)",
-        primary: "hsl(var(--primary) / <alpha-value>)",
-        "primary-foreground": "hsl(var(--primary-foreground) / <alpha-value>)",
-        accent: "hsl(var(--accent) / <alpha-value>)",
-        "accent-foreground": "hsl(var(--accent-foreground) / <alpha-value>)",
+        background: token("background"),
+        surface: token("surface"),
+        foreground: token("foreground"),
+        muted: token("muted"),
+        "muted-foreground": token("muted-foreground"),
+        border: token("border"),
+        primary: token("primary"),
+        "primary-foreground": token("primary-foreground"),
+        "primary-soft": token("primary-soft"),
+        accent: token("accent"),
+        "accent-foreground": token("accent-foreground"),
+        "accent-soft": token("accent-soft"),
+        danger: token("danger"),
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         serif: ["var(--font-serif)", "Georgia", "serif"],
+      },
+      boxShadow: {
+        soft: "0 1px 2px hsl(var(--shadow) / 0.05), 0 8px 24px -12px hsl(var(--shadow) / 0.18)",
+        lift: "0 2px 4px hsl(var(--shadow) / 0.06), 0 18px 40px -18px hsl(var(--shadow) / 0.3)",
+      },
+      borderRadius: {
+        "4xl": "2rem",
       },
     },
   },

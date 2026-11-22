@@ -13,6 +13,7 @@ import Resend from "next-auth/providers/resend";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
+import { getDb } from "@/db";
 import {
   users,
   accounts,
@@ -20,10 +21,18 @@ import {
   verificationTokens,
 } from "@/db/schema";
 
-const connectionString =
-  process.env.DATABASE_URL ??
-  "postgresql://user:password@placeholder.neon.tech/neondb?sslmode=require";
-const db = drizzle(neon(connectionString));
+/**
+ * Conexión para el adaptador: la misma que usa la app (`getDb`, que respeta el
+ * driver configurado). Sin DATABASE_URL se usa un placeholder para que el
+ * build no falle; las operaciones reales requieren el valor correcto.
+ */
+function adapterDb() {
+  try {
+    return getDb();
+  } catch {
+    return drizzle(neon("postgresql://user:password@placeholder.neon.tech/neondb?sslmode=require"));
+  }
+}
 
 const providers: NextAuthConfig["providers"] = [];
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
@@ -53,8 +62,8 @@ export function enabledAuthMethods() {
   };
 }
 
-export const authConfig: NextAuthConfig = {
-  adapter: DrizzleAdapter(db, {
+export const authConfig = (): NextAuthConfig => ({
+  adapter: DrizzleAdapter(adapterDb(), {
     usersTable: users,
     accountsTable: accounts,
     sessionsTable: sessions,
@@ -77,6 +86,7 @@ export const authConfig: NextAuthConfig = {
     verifyRequest: "/ingresar/verificar",
     error: "/ingresar/error",
   },
-};
+});
 
-export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+// Inicialización perezosa: la conexión se crea en la primera solicitud.
+export const { handlers, auth, signIn, signOut } = NextAuth(() => authConfig());

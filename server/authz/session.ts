@@ -4,10 +4,10 @@
  * del cliente.
  */
 import "server-only";
-import { eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { getDb } from "@/db";
-import { userRoles } from "@/db/schema";
+import { churches, userRoles } from "@/db/schema";
 import type { Actor, RoleAssignment } from "./permissions";
 
 export async function getActor(): Promise<Actor> {
@@ -24,7 +24,16 @@ export async function getActor(): Promise<Actor> {
         churchId: userRoles.churchId,
       })
       .from(userRoles)
-      .where(eq(userRoles.userId, userId));
+      .leftJoin(churches, eq(churches.id, userRoles.churchId))
+      // Los roles de iglesia SOLO valen si la iglesia está verificada: un
+      // pastor de una iglesia pendiente, rechazada o suspendida no tiene
+      // permisos pastorales (docs/06 G.3 "Verificación").
+      .where(
+        and(
+          eq(userRoles.userId, userId),
+          or(eq(userRoles.scope, "platform"), eq(churches.status, "verified")),
+        ),
+      );
     roles = rows.map((r) => ({
       role: r.role,
       scope: r.scope,

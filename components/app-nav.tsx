@@ -2,95 +2,167 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  IconHome,
+  IconBook,
+  IconPath,
+  IconChat,
+  IconGrid,
+  IconChurch,
+  IconCalendar,
+  IconBookmark,
+  IconUser,
+  IconFlame,
+} from "./icons";
 
-type NavItem = { href: string; label: string; icon: React.ReactNode };
+type NavItem = { href: string; label: string; icon: React.ReactNode; match?: string[] };
 
-const items: NavItem[] = [
+// Móvil: 5 destinos (regla de pulgar). El resto vive en "Más".
+const mobile: NavItem[] = [
   { href: "/inicio", label: "Inicio", icon: <IconHome /> },
-  { href: "/asistente", label: "Asistente", icon: <IconChat /> },
   { href: "/biblia", label: "Biblia", icon: <IconBook /> },
-  { href: "/mi-camino", label: "Mi Camino", icon: <IconPath /> },
-  { href: "/iglesias", label: "Iglesias", icon: <IconChurch /> },
-  { href: "/perfil", label: "Perfil", icon: <IconUser /> },
+  { href: "/camino", label: "Camino", icon: <IconPath /> },
+  { href: "/asistente", label: "Asistente", icon: <IconChat /> },
+  {
+    href: "/perfil",
+    label: "Más",
+    icon: <IconGrid />,
+    match: ["/perfil", "/iglesias", "/eventos", "/planes", "/mi-camino", "/plan", "/apoyar", "/contenidos"],
+  },
 ];
 
-function isActive(pathname: string, href: string): boolean {
-  return pathname === href || pathname.startsWith(href + "/");
+const desktop: { title: string; items: NavItem[] }[] = [
+  {
+    title: "Crecer",
+    items: [
+      { href: "/inicio", label: "Inicio", icon: <IconHome /> },
+      { href: "/biblia", label: "Biblia", icon: <IconBook /> },
+      { href: "/camino", label: "Camino guiado", icon: <IconPath /> },
+      { href: "/planes", label: "Planes de lectura", icon: <IconFlame /> },
+      { href: "/asistente", label: "Asistente bíblico", icon: <IconChat /> },
+    ],
+  },
+  {
+    title: "Comunidad",
+    items: [
+      { href: "/iglesias", label: "Iglesias", icon: <IconChurch /> },
+      { href: "/eventos", label: "Eventos", icon: <IconCalendar /> },
+    ],
+  },
+  {
+    title: "Personal",
+    items: [
+      { href: "/mi-camino", label: "Mi espacio", icon: <IconBookmark /> },
+      { href: "/perfil", label: "Perfil", icon: <IconUser /> },
+    ],
+  },
+];
+
+function isActive(pathname: string, item: NavItem): boolean {
+  const targets = item.match ?? [item.href];
+  return targets.some((h) => pathname === h || pathname.startsWith(h + "/"));
 }
 
 export function AppNav() {
   const pathname = usePathname();
 
   return (
-    <nav
-      aria-label="Navegación principal"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur md:inset-y-0 md:right-auto md:w-60 md:border-r md:border-t-0"
-    >
-      <div className="flex md:h-full md:flex-col md:gap-1 md:p-4">
-        <p className="hidden px-3 py-4 text-lg font-semibold text-primary md:block">
-          Camino de Fe
+    <>
+      {/* Escritorio: barra lateral */}
+      <nav
+        aria-label="Navegación principal"
+        className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-border/70 bg-surface/80 px-4 py-6 backdrop-blur md:flex"
+      >
+        <Link href="/inicio" className="mb-8 flex items-center gap-2.5 px-3">
+          <Logo />
+          <span className="font-serif text-xl font-semibold tracking-tight">Camino de Fe</span>
+        </Link>
+        <div className="flex flex-1 flex-col gap-6">
+          {desktop.map((group) => (
+            <div key={group.title}>
+              <p className="mb-1.5 px-3 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground/80">
+                {group.title}
+              </p>
+              <ul className="flex flex-col gap-0.5">
+                {group.items.map((item) => {
+                  const active = isActive(pathname, item);
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        aria-current={active ? "page" : undefined}
+                        className={[
+                          "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition",
+                          active
+                            ? "bg-primary-soft text-primary"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                        ].join(" ")}
+                      >
+                        {item.icon}
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <p className="px-3 text-xs leading-relaxed text-muted-foreground">
+          Una herramienta para acompañar tu fe. No reemplaza a tu iglesia ni a tu pastor.
         </p>
-        <ul className="flex flex-1 md:flex-col md:gap-1">
-          {items.map((item) => {
-            const active = isActive(pathname, item.href);
+      </nav>
+
+      {/* Móvil: barra inferior */}
+      <nav
+        aria-label="Navegación principal"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
+      >
+        <ul className="flex">
+          {mobile.map((item) => {
+            const active = isActive(pathname, item);
             return (
-              <li key={item.href} className="flex-1 md:flex-none">
+              <li key={item.href} className="flex-1">
                 <Link
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={[
-                    "flex flex-col items-center gap-1 px-2 py-2 text-xs font-medium transition",
-                    "md:flex-row md:gap-3 md:rounded-lg md:px-3 md:py-2 md:text-sm",
-                    active
-                      ? "text-primary md:bg-muted"
-                      : "text-muted-foreground hover:text-foreground md:hover:bg-muted/60",
+                    "flex flex-col items-center gap-1 pb-2 pt-2.5 text-[0.7rem] font-medium transition",
+                    active ? "text-primary" : "text-muted-foreground",
                   ].join(" ")}
                 >
-                  <span aria-hidden className="h-5 w-5">
+                  <span
+                    className={[
+                      "grid h-7 w-12 place-items-center rounded-full transition",
+                      active ? "bg-primary-soft" : "",
+                    ].join(" ")}
+                  >
                     {item.icon}
                   </span>
-                  <span>{item.label}</span>
+                  {item.label}
                 </Link>
               </li>
             );
           })}
         </ul>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 }
 
-/* --- Íconos (SVG inline, heredan currentColor) --- */
-function base(children: React.ReactNode) {
+/** Marca: un sendero que asciende hacia la luz (sin clichés). */
+export function Logo({ className = "h-8 w-8" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-full w-full"
-    >
-      {children}
+    <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
+      <rect width="32" height="32" rx="9" className="fill-primary" />
+      <circle cx="21.5" cy="10" r="3.2" className="fill-accent" />
+      <path
+        d="M8 25c3.5 0 4-4 7.5-5.5S22 18 23 14"
+        fill="none"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        className="stroke-primary-foreground"
+      />
     </svg>
   );
-}
-function IconHome() {
-  return base(<><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V21h14V9.5" /></>);
-}
-function IconChat() {
-  return base(<path d="M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-4.5A8 8 0 1 1 21 12Z" />);
-}
-function IconBook() {
-  return base(<><path d="M4 5a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" /><path d="M17 3v16" /></>);
-}
-function IconPath() {
-  return base(<path d="M6 20c0-4 12-4 12-8s-8-4-8-8" />);
-}
-function IconChurch() {
-  return base(<><path d="M12 3v6" /><path d="M9 6h6" /><path d="M6 21v-8l6-3 6 3v8" /><path d="M10 21v-4h4v4" /></>);
-}
-function IconUser() {
-  return base(<><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>);
 }

@@ -19,7 +19,9 @@
     "db:seed": "tsx db/seed.ts",
     "db:import-bible": "tsx db/import-bible.ts",
     "eval": "tsx server/ai/eval/run.ts",
-    "db:fetch-bible": "tsx db/fetch-bible.ts"
+    "db:fetch-bible": "tsx db/fetch-bible.ts",
+    "e2e": "node tests/e2e/run.mjs",
+    "e2e:fixtures": "tsx tests/e2e/fixtures.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.3",

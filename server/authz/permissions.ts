@@ -41,10 +41,16 @@ export type Action =
   | "church:publish_content"
   | "church:manage_contact_requests"
   | "church:view_aggregate_stats"
+  | "church:manage_events"
+  | "church:manage_members"
   | "content:moderate"
   | "church:verify"
   | "finance:view_reports"
-  | "plans:configure";
+  | "plans:configure"
+  | "library:review"
+  | "platform:view_metrics"
+  | "audit:view"
+  | "account:delete_own";
 
 /** Contexto opcional de la acción (p. ej. la iglesia objetivo). */
 export type Context = {
@@ -94,6 +100,7 @@ export function can(actor: Actor, action: Action, context: Context = {}): boolea
     case "assistant:use":
     case "notes:manage_own":
     case "contact:create":
+    case "account:delete_own":
       return isRegistered(actor);
 
     // Gestión de la propia iglesia (rol verificado en esa iglesia) o admin.
@@ -101,18 +108,23 @@ export function can(actor: Actor, action: Action, context: Context = {}): boolea
     case "church:publish_content":
     case "church:manage_contact_requests":
     case "church:view_aggregate_stats":
+    case "church:manage_events":
+    case "church:manage_members":
       return (
         platformAdmin ||
         hasChurchRole(actor, VERIFIED_CHURCH_ROLES, context.churchId)
       );
 
-    // Moderación de contenido.
+    // Moderación de contenido y revisión de la biblioteca curada del asistente.
     case "content:moderate":
+    case "library:review":
       return platformAdmin || hasPlatformRole(actor, "content_moderator");
 
     // Verificación de iglesias/pastores y configuración de planes: solo plataforma.
     case "church:verify":
     case "plans:configure":
+    case "platform:view_metrics":
+    case "audit:view":
       return platformAdmin;
 
     // Reportes financieros: permiso separado.

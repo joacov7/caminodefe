@@ -1,30 +1,58 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { createContactRequest } from "@/server/churches/actions";
+import { buttonClass } from "@/components/ui";
+import { IconShield } from "@/components/icons";
 
 const REASONS: { value: string; label: string }[] = [
   { value: "oracion", label: "Pedido de oración" },
   { value: "acompanamiento", label: "Acompañamiento personal" },
   { value: "consulta_biblica", label: "Consulta bíblica" },
-  { value: "quiero_congregar", label: "Quiero congregar / conocer la iglesia" },
+  { value: "quiero_congregar", label: "Quiero visitar / conocer la iglesia" },
   { value: "otro", label: "Otro" },
 ];
 
-export function ContactForm({ churchId }: { churchId: string }) {
-  const [reason, setReason] = useState(REASONS[0]!.value);
-  const [message, setMessage] = useState("");
+export function ContactForm({
+  churchId,
+  churchName,
+  signedIn,
+  initialReason,
+  initialMessage,
+  callbackUrl,
+}: {
+  churchId: string;
+  churchName: string;
+  signedIn: boolean;
+  initialReason: string;
+  initialMessage: string;
+  callbackUrl: string;
+}) {
+  const [reason, setReason] = useState(initialReason);
+  const [message, setMessage] = useState(initialMessage);
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = useState<string | null>(null);
+
+  if (!signedIn) {
+    return (
+      <div className="rounded-3xl border border-dashed border-border bg-muted/40 p-6 text-sm">
+        Para que el pastor pueda responderte necesitás una cuenta.{" "}
+        <Link href={`/ingresar?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="font-semibold text-primary hover:underline">
+          Ingresá o creá tu cuenta
+        </Link>{" "}
+        (es gratis).
+      </div>
+    );
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setState("sending");
     const res = await createContactRequest({ churchId, reason, message });
-    if (res.ok) {
-      setState("sent");
-    } else {
+    if (res.ok) setState("sent");
+    else {
       setError(res.error);
       setState("idle");
     }
@@ -32,38 +60,46 @@ export function ContactForm({ churchId }: { churchId: string }) {
 
   if (state === "sent") {
     return (
-      <div
-        role="status"
-        className="rounded-2xl border border-primary/40 bg-primary/10 p-6 text-sm"
-      >
-        Tu solicitud fue enviada. Podrás ver su estado y retirarla desde tu perfil.
+      <div role="status" className="rounded-3xl bg-primary-soft p-6">
+        <p className="font-serif text-xl font-semibold text-primary">¡Listo! Tu mensaje llegó a {churchName}.</p>
+        <p className="mt-2 text-sm text-foreground/80">
+          Podés ver el estado y retirarlo cuando quieras desde{" "}
+          <Link href="/perfil" className="font-medium text-primary hover:underline">tu perfil</Link>.
+        </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="reason" className="text-sm font-medium">
-          Motivo
-        </label>
-        <select
-          id="reason"
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          className="rounded-xl border border-border bg-background px-3 py-2 text-sm"
-        >
+    <form onSubmit={onSubmit} className="flex flex-col gap-5 rounded-3xl border border-border/80 bg-surface p-5 shadow-soft sm:p-6">
+      <fieldset>
+        <legend className="label">¿En qué te pueden ayudar?</legend>
+        <div className="grid gap-2 sm:grid-cols-2">
           {REASONS.map((r) => (
-            <option key={r.value} value={r.value}>
+            <label
+              key={r.value}
+              className={[
+                "flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 text-sm transition",
+                reason === r.value ? "border-primary bg-primary-soft text-primary" : "border-border hover:bg-muted",
+              ].join(" ")}
+            >
+              <input
+                type="radio"
+                name="reason"
+                value={r.value}
+                checked={reason === r.value}
+                onChange={() => setReason(r.value)}
+                className="accent-[hsl(var(--primary))]"
+              />
               {r.label}
-            </option>
+            </label>
           ))}
-        </select>
-      </div>
+        </div>
+      </fieldset>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="message" className="text-sm font-medium">
-          Mensaje (opcional)
+      <div>
+        <label htmlFor="message" className="label">
+          Mensaje <span className="font-normal text-muted-foreground">(opcional)</span>
         </label>
         <textarea
           id="message"
@@ -71,27 +107,23 @@ export function ContactForm({ churchId }: { churchId: string }) {
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
           maxLength={2000}
-          placeholder="Contanos brevemente en qué podemos ayudarte…"
-          className="rounded-xl border border-border bg-background px-3 py-2 text-sm"
+          placeholder="Contá brevemente en qué podemos ayudarte…"
+          className="input resize-y"
         />
-        <p className="text-xs text-muted-foreground">
-          Compartí solo lo que quieras. No incluyas datos sensibles que no sean
-          necesarios.
+        <p className="mt-2 flex items-start gap-1.5 text-xs text-muted-foreground">
+          <IconShield className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          Solo lo recibe el equipo pastoral de {churchName}. Compartí únicamente lo que quieras.
         </p>
       </div>
 
       {error && (
-        <p role="alert" className="text-sm text-muted-foreground">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={state === "sending"}
-        className="self-start rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition enabled:hover:opacity-90 disabled:opacity-50"
-      >
-        {state === "sending" ? "Enviando…" : "Enviar solicitud"}
+      <button type="submit" disabled={state === "sending"} className={buttonClass("primary", "self-start")}>
+        {state === "sending" ? "Enviando…" : "Enviar"}
       </button>
     </form>
   );

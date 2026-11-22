@@ -48,3 +48,16 @@ export function canChurchTransition(
 ): boolean {
   return CHURCH_TRANSITIONS[current].includes(next);
 }
+
+/**
+ * Motivo sugerido a partir de un texto de origen (p. ej. una etapa del camino
+ * guiado o un evento). La persona siempre puede cambiarlo.
+ */
+export function reasonFromMotivo(motivo: string | undefined | null): ContactReason {
+  const m = (motivo ?? "").toLowerCase();
+  if (/visitar|congregar|grupo|ser parte|iglesia/.test(m)) return "quiero_congregar";
+  if (/oraci[oó]n|orar/.test(m)) return "oracion";
+  if (/biblia|pregunta|leer/.test(m)) return "consulta_biblica";
+  if (m.trim()) return "acompanamiento";
+  return "oracion";
+}

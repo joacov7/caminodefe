@@ -1,84 +1,88 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listVerifiedChurches } from "@/server/churches/queries";
+import { PageHeader, EmptyState, Card, Badge } from "@/components/ui";
+import { IconPin, IconSearch, IconShield } from "@/components/icons";
 
-export const metadata: Metadata = { title: "Iglesias" };
+export const metadata: Metadata = {
+  title: "Iglesias",
+  description: "Encontrá una iglesia evangélica verificada cerca tuyo: horarios, ubicación, eventos y contacto con un pastor.",
+};
 export const dynamic = "force-dynamic";
 
 export default async function IglesiasPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; motivo?: string }>;
 }) {
-  const { q } = await searchParams;
-  const churches = await listVerifiedChurches(q?.trim() || undefined);
+  const { q, motivo } = await searchParams;
+  const search = q?.trim().slice(0, 60) || undefined;
+  const churches = await listVerifiedChurches(search).catch(() => null);
+  const suffix = motivo ? `?motivo=${encodeURIComponent(motivo.slice(0, 120))}` : "";
 
   return (
-    <main className="flex flex-col gap-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Iglesias</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Encontrá una comunidad local. El contacto con un pastor siempre es
-          voluntario y respetuoso.
-        </p>
-      </header>
+    <main className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow="Comunidad"
+        title="Encontrá una iglesia"
+        description="Comunidades verificadas por el equipo de Camino de Fe. El contacto siempre es voluntario y respetuoso."
+      />
 
-      <form className="flex items-center gap-2 rounded-2xl border border-border p-2">
-        <input
-          type="search"
-          name="q"
-          defaultValue={q ?? ""}
-          placeholder="Buscar por nombre o ciudad…"
-          aria-label="Buscar iglesias"
-          className="flex-1 bg-transparent px-3 py-2 text-sm outline-none"
-        />
-        <button
-          type="submit"
-          className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-        >
-          Buscar
-        </button>
+      {motivo && (
+        <p className="rounded-2xl bg-accent-soft px-4 py-3 text-sm text-accent-foreground">
+          Elegí una iglesia para enviar: <strong>«{motivo.slice(0, 120)}»</strong>
+        </p>
+      )}
+
+      <form role="search" className="relative">
+        <label htmlFor="q" className="sr-only">Buscar iglesias</label>
+        <IconSearch className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <input id="q" type="search" name="q" defaultValue={search} placeholder="Buscar por nombre o ciudad" className="input pl-10" />
+        {motivo && <input type="hidden" name="motivo" value={motivo} />}
       </form>
 
       {churches === null ? (
-        <p className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-          El directorio se conecta con la base de datos una vez configurada.
-        </p>
+        <EmptyState title="Directorio no disponible">El directorio se conecta con la base de datos una vez configurada.</EmptyState>
       ) : churches.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-          No hay iglesias verificadas que coincidan con tu búsqueda.
-        </p>
+        <EmptyState title="No encontramos iglesias verificadas con esa búsqueda">
+          Probá con otra ciudad o barrio.
+        </EmptyState>
       ) : (
-        <ul className="grid grid-cols-1 gap-4">
+        <ul className="grid gap-3">
           {churches.map((c) => (
             <li key={c.id}>
               <Link
-                href={`/iglesias/${c.slug}`}
-                className="block rounded-2xl border border-border p-5 transition hover:bg-muted/50"
+                href={motivo ? `/iglesias/${c.slug}/contactar${suffix}` : `/iglesias/${c.slug}`}
+                className="group block rounded-3xl border border-border/80 bg-surface p-5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-lift"
               >
-                <h2 className="font-semibold text-primary">{c.name}</h2>
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="font-serif text-xl font-semibold">{c.name}</h2>
+                  <Badge tone="primary">
+                    <IconShield className="h-3 w-3" /> Verificada
+                  </Badge>
+                </div>
                 {c.generalLocation && (
-                  <p className="text-xs text-muted-foreground">{c.generalLocation}</p>
-                )}
-                {c.description && (
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                    {c.description}
+                  <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <IconPin className="h-4 w-4" /> {c.generalLocation}
                   </p>
                 )}
+                {c.description && <p className="mt-2 line-clamp-2 text-sm text-foreground/80">{c.description}</p>}
               </Link>
             </li>
           ))}
         </ul>
       )}
 
-      <article className="rounded-2xl border border-border p-5">
-        <h2 className="font-semibold">¿Tenés una iglesia?</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Camino de Fe no busca reemplazar a la iglesia: ofrece herramientas
-          digitales para servirla. El registro y la verificación se realizan con
-          un proceso administrativo.
+      <Card className="bg-primary-soft/50">
+        <h2 className="font-serif text-lg font-semibold">¿Sos pastor o líder?</h2>
+        <p className="mt-1 text-sm text-foreground/80">
+          Sumá tu iglesia gratis: perfil, horarios, eventos y una bandeja para recibir a quienes buscan una comunidad. La
+          verificación la realiza el equipo de Camino de Fe.
         </p>
-      </article>
+        <Link href="/iglesias/sumar" className="mt-3 inline-block text-sm font-semibold text-primary hover:underline">
+          Quiero sumar mi iglesia →
+        </Link>
+      </Card>
     </main>
   );
 }
