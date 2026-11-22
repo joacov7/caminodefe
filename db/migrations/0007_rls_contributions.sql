@@ -3,12 +3,15 @@
 -- Usa helpers de 0001_rls_policies.sql. La suscripción es privada del usuario.
 
 ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 CREATE POLICY subscriptions_owner ON subscriptions
   USING (user_id = app_current_user_id())
   WITH CHECK (user_id = app_current_user_id());
 
+--> statement-breakpoint
 ALTER TABLE contributions ENABLE ROW LEVEL SECURITY;
 -- Lectura: el donante, o quien gestiona la iglesia destinataria, o admin.
+--> statement-breakpoint
 CREATE POLICY contributions_read ON contributions
   FOR SELECT
   USING (
@@ -17,6 +20,7 @@ CREATE POLICY contributions_read ON contributions
     OR (recipient_church_id IS NOT NULL AND app_manages_church(recipient_church_id))
   );
 -- Escritura: solo el propio donante crea/modifica sus aportes.
+--> statement-breakpoint
 CREATE POLICY contributions_write ON contributions
   FOR ALL
   USING (user_id = app_current_user_id())

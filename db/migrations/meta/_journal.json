@@ -57,6 +57,27 @@
       "when": 1789653804313,
       "tag": "0007_rls_contributions",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795350054194,
+      "tag": "0008_force_rls_privados",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795350358555,
+      "tag": "0009_fase3_modulos",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795350368251,
+      "tag": "0010_rls_y_busqueda",
+      "breakpoints": true
     }
   ]
 }

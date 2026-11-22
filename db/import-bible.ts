@@ -12,9 +12,8 @@
  * Uso: `npx tsx db/import-bible.ts` (requiere DATABASE_URL).
  */
 import { readFile } from "node:fs/promises";
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-import { requireEnv } from "../lib/env";
+import { sql } from "drizzle-orm";
+import { getDb } from "./index";
 import { bibleVerses, bibleVersions } from "./schema";
 import { getBookByName } from "../lib/bible/books";
 
@@ -46,6 +45,8 @@ export function flattenBibleDataset(
     }
     book.chapters.forEach((verses, chapterIdx) => {
       verses.forEach((text, verseIdx) => {
+        // Versículos vacíos (diferencias de versificación) no se insertan.
+        if (!text.trim()) return;
         rows.push({
           versionId,
           book: known.name,
@@ -65,9 +66,7 @@ async function main() {
   const dataset = JSON.parse(raw) as BibleDataset;
   const rows = flattenBibleDataset(dataset, versionId);
 
-  const db = drizzle(neon(requireEnv("DATABASE_URL")), {
-    schema: { bibleVerses, bibleVersions },
-  });
+  const db = getDb();
 
   await db
     .insert(bibleVersions)
@@ -86,10 +85,20 @@ async function main() {
     await db
       .insert(bibleVerses)
       .values(rows.slice(i, i + batchSize))
-      .onConflictDoNothing();
+      // El texto importado reemplaza cualquier versículo de muestra (semilla).
+      .onConflictDoUpdate({
+        target: [
+          bibleVerses.versionId,
+          bibleVerses.book,
+          bibleVerses.chapter,
+          bibleVerses.verse,
+        ],
+        set: { text: sql`excluded.text` },
+      });
   }
 
   console.log(`Importados ${rows.length} versículos de ${versionId}.`);
+  process.exit(0);
 }
 
 // Ejecutar solo si se invoca directamente (no al importar en tests).

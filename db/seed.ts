@@ -6,15 +6,11 @@
  * La importación completa de la Biblia RVR1909 se hará como tarea de datos
  * aparte (Paso 2). Uso: `npm run db:seed` (requiere DATABASE_URL).
  */
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-import { requireEnv } from "../lib/env";
+import { getDb } from "./index";
 import { bibleVersions, bibleVerses, plans, contentItems } from "./schema";
 
 async function main() {
-  const db = drizzle(neon(requireEnv("DATABASE_URL")), {
-    schema: { bibleVersions, bibleVerses, plans, contentItems },
-  });
+  const db = getDb();
 
   await db
     .insert(bibleVersions)
@@ -83,6 +79,7 @@ async function main() {
   await db
     .insert(contentItems)
     .values({
+      id: "seed-devocional-buen-pastor", // id fijo: la semilla es idempotente
       churchId: null,
       type: "devotional",
       title: "Descansar en el Buen Pastor",
@@ -103,6 +100,7 @@ async function main() {
     .onConflictDoNothing();
 
   console.log("Semillas cargadas correctamente.");
+  process.exit(0);
 }
 
 main().catch((err) => {

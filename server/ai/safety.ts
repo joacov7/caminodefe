@@ -23,7 +23,25 @@ export const EMERGENCY_RESOURCES: EmergencyResource[] = [
     contact: "135 (línea gratuita) / (011) 5275-1135",
     country: "AR",
   },
+  {
+    label: "Línea 144 — violencia de género (Argentina, 24 h, gratuita)",
+    contact: "144",
+    country: "AR",
+  },
+  {
+    label: "Línea 137 — violencia familiar y sexual (Argentina)",
+    contact: "137",
+    country: "AR",
+  },
 ];
+
+/**
+ * Mensaje de respaldo cuando no hay recursos cargados para el país: la
+ * respuesta de crisis NUNCA debe quedar sin una vía concreta de ayuda.
+ */
+export const FALLBACK_RESOURCE_LINE =
+  "- Llamá al número de emergencias de tu país o acudí a la guardia del " +
+  "hospital más cercano.";
 
 // Señales léxicas de crisis. Heurística conservadora en español: ante la duda,
 // mejor ofrecer ayuda humana de más que de menos.
@@ -55,7 +73,9 @@ export function detectSafetyFlag(text: string): SafetyFlag {
 /** Respuesta empática de crisis, con recursos. No usa el modelo de IA. */
 export function buildCrisisResponse(country = "AR"): string {
   const resources = EMERGENCY_RESOURCES.filter((r) => r.country === country);
-  const lines = resources.map((r) => `- ${r.label}: ${r.contact}`).join("\n");
+  const lines = resources.length
+    ? resources.map((r) => `- ${r.label}: ${r.contact}`).join("\n")
+    : FALLBACK_RESOURCE_LINE;
   return [
     "Lamento mucho que estés pasando por un momento tan difícil. Tu vida y tu " +
       "seguridad importan.",

@@ -1,17 +1,26 @@
 /**
  * Aplica las migraciones versionadas de `db/migrations` a la base de datos.
  * Uso: `npm run db:migrate` (requiere DATABASE_URL).
+ * Con `DATABASE_DRIVER=pg` usa node-postgres (desarrollo/CI con Postgres local).
  */
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-import { migrate } from "drizzle-orm/neon-http/migrator";
 import { requireEnv } from "../lib/env";
 
 async function main() {
-  const client = neon(requireEnv("DATABASE_URL"));
-  const db = drizzle(client);
+  const url = requireEnv("DATABASE_URL");
   console.log("Aplicando migraciones...");
-  await migrate(db, { migrationsFolder: "./db/migrations" });
+  if (process.env.DATABASE_DRIVER === "pg") {
+    const { Pool } = await import("pg");
+    const { drizzle } = await import("drizzle-orm/node-postgres");
+    const { migrate } = await import("drizzle-orm/node-postgres/migrator");
+    const pool = new Pool({ connectionString: url });
+    await migrate(drizzle(pool), { migrationsFolder: "./db/migrations" });
+    await pool.end();
+  } else {
+    const { neon } = await import("@neondatabase/serverless");
+    const { drizzle } = await import("drizzle-orm/neon-http");
+    const { migrate } = await import("drizzle-orm/neon-http/migrator");
+    await migrate(drizzle(neon(url)), { migrationsFolder: "./db/migrations" });
+  }
   console.log("Migraciones aplicadas correctamente.");
 }
 

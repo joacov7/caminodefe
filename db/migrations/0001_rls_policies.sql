@@ -13,11 +13,13 @@ CREATE OR REPLACE FUNCTION app_current_user_id() RETURNS text AS $$
   SELECT nullif(current_setting('app.user_id', true), '');
 $$ LANGUAGE sql STABLE;
 
+--> statement-breakpoint
 CREATE OR REPLACE FUNCTION app_is_platform_admin() RETURNS boolean AS $$
   SELECT coalesce(current_setting('app.is_platform_admin', true) = 'true', false);
 $$ LANGUAGE sql STABLE;
 
 -- ¿El usuario actual pertenece (activo) a la iglesia dada?
+--> statement-breakpoint
 CREATE OR REPLACE FUNCTION app_is_member_of(target_church_id text)
 RETURNS boolean AS $$
   SELECT EXISTS (
@@ -29,6 +31,7 @@ RETURNS boolean AS $$
 $$ LANGUAGE sql STABLE;
 
 -- ¿El usuario actual tiene un rol de gestión (verificado) en la iglesia dada?
+--> statement-breakpoint
 CREATE OR REPLACE FUNCTION app_manages_church(target_church_id text)
 RETURNS boolean AS $$
   SELECT EXISTS (
@@ -43,12 +46,16 @@ $$ LANGUAGE sql STABLE;
 -- =====================================================================
 -- Datos PERSONALES: privados por dueño. Nadie más (ni pastor ni admin).
 -- =====================================================================
+--> statement-breakpoint
 ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 CREATE POLICY conversations_owner ON conversations
   USING (user_id = app_current_user_id())
   WITH CHECK (user_id = app_current_user_id());
 
+--> statement-breakpoint
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 CREATE POLICY messages_owner ON messages
   USING (
     EXISTS (
@@ -65,7 +72,9 @@ CREATE POLICY messages_owner ON messages
     )
   );
 
+--> statement-breakpoint
 ALTER TABLE message_citations ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 CREATE POLICY message_citations_owner ON message_citations
   USING (
     EXISTS (
@@ -81,7 +90,9 @@ CREATE POLICY message_citations_owner ON message_citations
 -- Solicitudes de contacto: visibles para el usuario que las creó y para
 -- quienes gestionan la iglesia destinataria (o admin de plataforma).
 -- =====================================================================
+--> statement-breakpoint
 ALTER TABLE contact_requests ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 CREATE POLICY contact_requests_access ON contact_requests
   USING (
     user_id = app_current_user_id()
@@ -97,7 +108,9 @@ CREATE POLICY contact_requests_access ON contact_requests
 -- =====================================================================
 -- Membresías de iglesia: el propio usuario, gestores de esa iglesia o admin.
 -- =====================================================================
+--> statement-breakpoint
 ALTER TABLE church_members ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 CREATE POLICY church_members_access ON church_members
   USING (
     user_id = app_current_user_id()
@@ -113,7 +126,9 @@ CREATE POLICY church_members_access ON church_members
 -- Contenido de iglesia: lo publicado es legible por todos; borradores solo
 -- por gestores de esa iglesia o admin. Escritura solo gestores/admin.
 -- =====================================================================
+--> statement-breakpoint
 ALTER TABLE content_items ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 CREATE POLICY content_items_read ON content_items
   FOR SELECT
   USING (
@@ -121,6 +136,7 @@ CREATE POLICY content_items_read ON content_items
     OR app_is_platform_admin()
     OR (church_id IS NOT NULL AND app_manages_church(church_id))
   );
+--> statement-breakpoint
 CREATE POLICY content_items_write ON content_items
   FOR ALL
   USING (
@@ -135,10 +151,13 @@ CREATE POLICY content_items_write ON content_items
 -- =====================================================================
 -- Auditoría: solo lectura para admin de plataforma; inserción desde backend.
 -- =====================================================================
+--> statement-breakpoint
 ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 CREATE POLICY audit_log_admin_read ON audit_log
   FOR SELECT
   USING (app_is_platform_admin());
+--> statement-breakpoint
 CREATE POLICY audit_log_insert ON audit_log
   FOR INSERT
   WITH CHECK (true);

@@ -12,6 +12,17 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # Rol dueño NO superusuario (como en Neon) para que la RLS forzada aplique.
+      TEST_DATABASE_URL: postgresql://cdf_owner:cdf@localhost:5432/cdf
     steps:
       - uses: actions/checkout@v4
 
@@ -29,7 +40,15 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Pruebas
+      - name: Preparar base de pruebas (rol no superusuario + migraciones)
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -c "create role cdf_owner login password 'cdf'"
+          psql -h localhost -U postgres -c "create database cdf owner cdf_owner"
+          DATABASE_DRIVER=pg DATABASE_URL=$TEST_DATABASE_URL npm run db:migrate
+
+      - name: Pruebas (unitarias + integración con Postgres)
         run: npm test
 
       - name: Build

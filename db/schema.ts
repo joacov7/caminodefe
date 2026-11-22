@@ -166,6 +166,8 @@ export const churches = pgTable(
     socialLinks: jsonb("social_links").$type<Record<string, string>>(),
     website: text("website"),
     status: churchStatusEnum("status").default("pending").notNull(),
+    // Nivel de herramientas para iglesias (docs/13 §5.2). Sin cobro aún.
+    plan: text("plan").default("free").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => [uniqueIndex("churches_slug_idx").on(t.slug)],
@@ -219,10 +221,18 @@ export const churchEvents = pgTable(
     description: text("description"),
     location: text("location"),
     startsAt: timestamp("starts_at").notNull(),
+    endsAt: timestamp("ends_at"),
+    // Enlace a transmisión o reunión virtual (opcional).
+    onlineUrl: text("online_url"),
     visibility: text("visibility").default("public").notNull(), // public | members
+    createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (t) => [index("church_events_church_idx").on(t.churchId)],
+  (t) => [
+    index("church_events_church_idx").on(t.churchId),
+    index("church_events_starts_idx").on(t.startsAt),
+  ],
 );
 
 // Roles del usuario, con alcance de plataforma o de una iglesia específica.
@@ -555,4 +565,110 @@ export const auditLog = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => [index("audit_log_actor_idx").on(t.actorUserId)],
+);
+
+
+// ---------------------------------------------------------------------------
+// Planes de lectura, recordatorios y camino guiado — PRIVADOS por dueño (RLS
+// forzada). El CONTENIDO de planes y etapas vive versionado en `content/`.
+// ---------------------------------------------------------------------------
+export const readingPlanDays = pgTable(
+  "reading_plan_days",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    planId: text("plan_id").notNull(),
+    day: integer("day").notNull(),
+    completedAt: timestamp("completed_at").defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.planId, t.day] })],
+);
+
+export const reminderPrefs = pgTable("reminder_prefs", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  enabled: boolean("enabled").default(false).notNull(),
+  time: text("time").default("08:00").notNull(), // HH:MM local
+  days: jsonb("days").$type<number[]>().default([0, 1, 2, 3, 4, 5, 6]).notNull(),
+  timezone: text("timezone").default("America/Argentina/Buenos_Aires").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const guidedPathProgress = pgTable(
+  "guided_path_progress",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    stageId: text("stage_id").notNull(),
+    completedAt: timestamp("completed_at").defaultNow().notNull(),
+    // Reflexión personal de la etapa (privada; nadie más la ve).
+    reflection: text("reflection"),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.stageId] })],
+);
+
+// ---------------------------------------------------------------------------
+// Asistente — biblioteca curada (revisión humana) y caché por similitud.
+// Sin datos personales: solo preguntas generales elegibles (server/ai/cache).
+// ---------------------------------------------------------------------------
+export const answerLibrary = pgTable(
+  "answer_library",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    question: text("question").notNull(),
+    normalizedQuestion: text("normalized_question").notNull(),
+    answer: text("answer").notNull(),
+    status: editorialStatusEnum("status").default("draft").notNull(),
+    embedding: jsonb("embedding").$type<number[]>(),
+    createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
+    reviewedBy: text("reviewed_by").references(() => users.id, { onDelete: "set null" }),
+    reviewedAt: timestamp("reviewed_at"),
+    retiredAt: timestamp("retired_at"),
+    hits: integer("hits").default(0).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [index("answer_library_status_idx").on(t.status)],
+);
+
+export const answerCache = pgTable(
+  "answer_cache",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    normalizedQuestion: text("normalized_question").notNull(),
+    embedding: jsonb("embedding").$type<number[]>().notNull(),
+    answer: text("answer").notNull(),
+    model: text("model").notNull(),
+    hits: integer("hits").default(0).notNull(),
+    invalidatedAt: timestamp("invalidated_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex("answer_cache_question_idx").on(t.normalizedQuestion)],
+);
+
+// ---------------------------------------------------------------------------
+// Plataforma: rate limiting (ventana fija) y analítica AGREGADA (sin userId,
+// sin IP, sin cookies: no identifica personas).
+// ---------------------------------------------------------------------------
+export const rateLimits = pgTable("rate_limits", {
+  key: text("key").primaryKey(),
+  windowStart: timestamp("window_start").notNull(),
+  count: integer("count").default(0).notNull(),
+});
+
+export const analyticsDaily = pgTable(
+  "analytics_daily",
+  {
+    day: text("day").notNull(), // YYYY-MM-DD
+    event: text("event").notNull(),
+    dim: text("dim").default("").notNull(), // dimensión no personal (p. ej. plan)
+    count: integer("count").default(0).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.day, t.event, t.dim] })],
 );
