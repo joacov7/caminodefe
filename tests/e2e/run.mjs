@@ -244,6 +244,22 @@ await step("admin: métricas agregadas, auditoría y biblioteca curada", async (
   await admin.getByRole("button", { name: "Guardar borrador" }).click();
   await admin.getByText(q).waitFor();
 });
+await step("admin: configuración muestra estado y prueba la base sin exponer secretos", async () => {
+  await go(admin, "/admin/configuracion");
+  await admin.getByRole("heading", { name: "Configuración" }).waitFor();
+  await admin.getByText("○ OPENAI_API_KEY").waitFor();
+  const html = await admin.content();
+  assert.ok(!html.includes("e2e-local-secret"), "¡se mostró el valor de AUTH_SECRET!");
+  assert.ok(!html.includes("postgresql://"), "¡se mostró la cadena de conexión!");
+  const db = admin.locator("li", { has: admin.getByRole("heading", { name: "Base de datos (Neon)" }) });
+  await db.getByRole("button", { name: "Probar conexión" }).click();
+  await db.getByRole("status").waitFor();
+  assert.match(await db.getByRole("status").innerText(), /Conectada/);
+});
+await step("configuración: inaccesible para quien no es admin", async () => {
+  await go(pastor, "/admin/configuracion");
+  await pastor.getByText("Acceso restringido").waitFor();
+});
 await step("admin: no ve el contenido privado de nadie", async () => {
   for (const path of ["/admin", "/admin/auditoria", "/admin/biblioteca"]) {
     await go(admin, path);

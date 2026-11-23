@@ -11,6 +11,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { href: "/admin/biblioteca", label: "Biblioteca IA" },
         { href: "/admin/eventos", label: "Eventos" },
         { href: "/admin/auditoria", label: "Auditoría" },
+        { href: "/admin/configuracion", label: "Configuración" },
       ]}
     >
       {children}

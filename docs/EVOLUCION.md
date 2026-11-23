@@ -130,3 +130,16 @@ despliegue en Neon).
 4. Notificaciones push opt-in (Web Push) para recordatorios y «tu iglesia está
    orando», con costos y consentimiento definidos.
 5. Herramientas de moderación → recién entonces grupos (F4).
+
+## Fase 7b — Configuración guiada (23/11/2026)
+
+- Pantalla **Administración → Configuración**: estado de cada integración
+  (configurada / incompleta / falta), pasos para obtener cada clave, nombre
+  exacto de la variable, advertencias (secreto corto, URL sin https, modo de
+  prueba de Mercado Pago, driver de desarrollo) y **Probar conexión** (base con
+  conteo de migraciones y versículos, OpenAI, Resend con dominio verificado,
+  Mercado Pago). Las pruebas usan endpoints de solo lectura y sin costo.
+- Decisión de seguridad documentada en `docs/14`: las claves NO se cargan desde
+  la app (se mantienen en variables de entorno de Vercel).
+- Pruebas: 130/130 · E2E 27/27 (incluye que ningún secreto aparece en la página
+  y que solo un admin de plataforma accede).

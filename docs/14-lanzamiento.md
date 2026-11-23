@@ -20,6 +20,15 @@ preparado y probado localmente.
 | 9 | **Consejo doctrinal**: aprobar contenido de `content/guided-path.ts` y `content/reading-plans.ts`, y las primeras entradas de la biblioteca curada | PR / panel `/admin/biblioteca` | Calidad pastoral |
 | 10 | Confirmar recursos de crisis de Argentina (911, 135, 144, 137) con una fuente oficial vigente | `server/ai/safety.ts` | Flujo de crisis |
 
+### Pantalla de Configuración
+En la app, **Administración → Configuración** (`/admin/configuracion`) muestra qué
+falta, explica dónde obtener cada clave y el nombre exacto de la variable, y tiene
+**Probar conexión** para la base, OpenAI, Resend y Mercado Pago. Nunca muestra ni
+guarda valores: las claves viven solo en Vercel (cifradas). Decisión: no se
+cargan secretos desde la app porque (1) la base y `AUTH_SECRET` se necesitan para
+que la app misma funcione, y (2) guardarlos en la base los expondría ante una
+cuenta de administrador comprometida o una copia filtrada de la base.
+
 ## 2. Pasos de despliegue (en orden)
 
 1. Crear proyecto en Neon (región São Paulo, la más cercana a Argentina).
